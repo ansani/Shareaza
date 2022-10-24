@@ -19,60 +19,58 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#include "StdAfx.h"
-#include "Shareaza.h"
 #include "FontManager.h"
+#include "Shareaza.h"
+#include "StdAfx.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #define new DEBUG_NEW
 #endif
 
-int GetDpi(HWND hWnd)
-{
-    HDC hDC = ::GetDC(hWnd);
-    INT ydpi = ::GetDeviceCaps(hDC, LOGPIXELSY);
-    ::ReleaseDC(hWnd, hDC);
-    return ydpi;
+int GetDpi(HWND hWnd) {
+  HDC hDC = ::GetDC(hWnd);
+  INT ydpi = ::GetDeviceCaps(hDC, LOGPIXELSY);
+  ::ReleaseDC(hWnd, hDC);
+  return ydpi;
 }
 
-CFontManager::CFontManager(void)
-{
-    LOGFONT lf;
-    theApp.m_gdiFont.GetLogFont( &lf );
+CFontManager::CFontManager(void) {
+  LOGFONT lf;
+  theApp.m_gdiFont.GetLogFont(&lf);
 
-    HDC hDC = GetDC( NULL );
-    if ( lf.lfHeight < 0 )
-        lf.lfHeight = -lf.lfHeight;
+  HDC hDC = GetDC(NULL);
+  if (lf.lfHeight < 0)
+    lf.lfHeight = -lf.lfHeight;
 
-    int dpi = GetDpi(GetDesktopWindow());
-    int scaling = static_cast<int>(100.0 * 96 / dpi);
+  int dpi = GetDpi(GetDesktopWindow());
+  int scaling = static_cast<int>(100.0 * 96 / dpi);
 
-    //m_nDefaultSize = (WORD)MulDiv( lf.lfHeight, 96, GetDeviceCaps( hDC, LOGPIXELSY ) );
-    m_nDefaultSize = (WORD)lf.lfHeight * scaling/100;
-    //m_nDefaultSize = scaling;
+  // m_nDefaultSize = (WORD)MulDiv( lf.lfHeight, 96, GetDeviceCaps( hDC,
+  // LOGPIXELSY ) );
+  m_nDefaultSize = (WORD)lf.lfHeight * scaling / 100;
+  // m_nDefaultSize = scaling;
 
-//	m_nDefaultSize = 10;
+  //	m_nDefaultSize = 10;
 
-    m_sFontName = lf.lfFaceName;
+  m_sFontName = lf.lfFaceName;
 
-    ReleaseDC( NULL, hDC );
+  ReleaseDC(NULL, hDC);
 }
 
-const DLGTEMPLATE* CFontManager::PreCreateDialog(_AFX_OCC_DIALOG_INFO* pOccDialogInfo,
-        const DLGTEMPLATE* pOrigTemplate)
-{
-    const DLGTEMPLATE *lpNewTemplate = COccManager::PreCreateDialog( pOccDialogInfo, pOrigTemplate );
+const DLGTEMPLATE *
+CFontManager::PreCreateDialog(_AFX_OCC_DIALOG_INFO *pOccDialogInfo,
+                              const DLGTEMPLATE *pOrigTemplate) {
+  const DLGTEMPLATE *lpNewTemplate =
+      COccManager::PreCreateDialog(pOccDialogInfo, pOrigTemplate);
 
-    if ( !pOccDialogInfo->m_pNewTemplate )
-    {
-        CDialogTemplate temp( lpNewTemplate );
+  if (!pOccDialogInfo->m_pNewTemplate) {
+    CDialogTemplate temp(lpNewTemplate);
 
-        temp.SetFont( m_sFontName, m_nDefaultSize );
-        pOccDialogInfo->m_pNewTemplate = (DLGTEMPLATE*)temp.Detach();
-        return pOccDialogInfo->m_pNewTemplate;
-    }
-    else
-        return lpNewTemplate;
+    temp.SetFont(m_sFontName, m_nDefaultSize);
+    pOccDialogInfo->m_pNewTemplate = (DLGTEMPLATE *)temp.Detach();
+    return pOccDialogInfo->m_pNewTemplate;
+  } else
+    return lpNewTemplate;
 }
