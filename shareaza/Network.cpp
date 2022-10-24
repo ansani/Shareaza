@@ -61,7 +61,7 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-inline bool IsValidDomainSymbol(TCHAR c)
+inline bool IsValidDomainSymbol(TCHAR c) noexcept
 {
 	return ( ( c == _T('.') ) ||
 			 ( c >= _T('a') && c <= _T('z') ) ||
@@ -457,44 +457,44 @@ void CNetwork::Disconnect()
 //////////////////////////////////////////////////////////////////////
 // CNetwork host connection
 
-BOOL CNetwork::ConnectTo(LPCTSTR pszAddress, int nPort, PROTOCOLID nProtocol, BOOL bNoUltraPeer)
+BOOL CNetwork::ConnectTo(LPCTSTR pszAddress, u_short nPort, PROTOCOLID nProtocol, BOOL bNoUltraPeer)
 {
 	if ( nPort <= 0 || nPort > USHRT_MAX )
 	{
 		nPort = protocolPorts[ ( nProtocol == PROTOCOL_ANY ) ? PROTOCOL_NULL : nProtocol ];
 	}
 
-	SOCKADDR_IN6 saHost;
-	if ( IPv6FromString( pszAddress, &saHost ) )
+	SOCKADDR_IN6 saHost_v6;
+	if ( IPv6FromString( pszAddress, &saHost_v6) )
 	{
-		if ( saHost.sin6_port == 0 )
-			saHost.sin6_port = htons( nPort );
+		if (saHost_v6.sin6_port == 0 )
+			saHost_v6.sin6_port = htons( nPort );
 
 		// It's IPv6 address
-		HostCache.ForProtocol( nProtocol )->AddIPv6( &saHost.sin6_addr, ntohs( saHost.sin6_port ), NULL );
+		HostCache.ForProtocol( nProtocol )->AddIPv6( &saHost_v6.sin6_addr, ntohs(saHost_v6.sin6_port ), NULL );
 
-		Neighbours.ConnectTo( saHost.sin6_addr, ntohs( saHost.sin6_port ), nProtocol, FALSE, bNoUltraPeer );
+		Neighbours.ConnectTo(saHost_v6.sin6_addr, ntohs(saHost_v6.sin6_port ), nProtocol, FALSE, bNoUltraPeer );
 		return TRUE;
 	}
 	else
 	{
 		// Try to quick resolve dotted IP address
-		SOCKADDR_IN saHost;
-		if ( ! Resolve( pszAddress, nPort, &saHost, FALSE ) )
+		SOCKADDR_IN saHost_v4;
+		if ( ! Resolve( pszAddress, nPort, &saHost_v4, FALSE ) )
 			// Bad address
 			return FALSE;
 
-		if ( saHost.sin_addr.s_addr != INADDR_ANY )
+		if (saHost_v4.sin_addr.s_addr != INADDR_ANY )
 		{
 			// It's dotted IP address
-			HostCache.ForProtocol( nProtocol )->Add( &saHost.sin_addr, ntohs( saHost.sin_port ), NULL );
+			HostCache.ForProtocol( nProtocol )->Add( &saHost_v4.sin_addr, ntohs(saHost_v4.sin_port ), NULL );
 
-			Neighbours.ConnectTo( saHost.sin_addr, ntohs( saHost.sin_port ), nProtocol, FALSE, bNoUltraPeer );
+			Neighbours.ConnectTo(saHost_v4.sin_addr, ntohs(saHost_v4.sin_port ), nProtocol, FALSE, bNoUltraPeer );
 			return TRUE;
 		}
 	}
 
-	return AsyncResolve( pszAddress, (WORD)nPort, nProtocol, bNoUltraPeer ? (BYTE)RESOLVE_CONNECT : (BYTE)RESOLVE_CONNECT_ULTRAPEER );
+	return AsyncResolve( pszAddress, nPort, nProtocol, bNoUltraPeer ? (BYTE)RESOLVE_CONNECT : (BYTE)RESOLVE_CONNECT_ULTRAPEER );
 }
 
 //////////////////////////////////////////////////////////////////////

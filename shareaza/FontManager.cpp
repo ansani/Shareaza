@@ -32,7 +32,7 @@ static char THIS_FILE[]=__FILE__;
 int GetDpi(HWND hWnd)
 {
 	HDC hDC = ::GetDC(hWnd);
-	INT ydpi = ::GetDeviceCaps(hDC, LOGPIXELSY);
+	INT const ydpi = ::GetDeviceCaps(hDC, LOGPIXELSY);
 	::ReleaseDC(hWnd, hDC);
 	return ydpi;
 }
@@ -46,8 +46,8 @@ CFontManager::CFontManager(void)
 	if ( lf.lfHeight < 0 )
 		lf.lfHeight = -lf.lfHeight;
 
-	int dpi = GetDpi(GetDesktopWindow());
-	int scaling = static_cast<int>(100.0 * 96 / dpi);
+	int const dpi = GetDpi(GetDesktopWindow());
+	int const scaling = static_cast<int>(100.0 * 96 / dpi);
 
 	//m_nDefaultSize = (WORD)MulDiv( lf.lfHeight, 96, GetDeviceCaps( hDC, LOGPIXELSY ) );
 	m_nDefaultSize = (WORD)lf.lfHeight * scaling/100;

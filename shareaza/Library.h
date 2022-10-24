@@ -83,7 +83,7 @@ public:
 	// bForce = true - Library has also disk changes so it must be rescanned.
 	inline void Update(bool bForce = false)
 	{
-		InterlockedExchange( &m_nUpdateCookie, (LONG)GetTickCount() );
+		InterlockedExchange( &m_nUpdateCookie, (LONG)GetTickCount64() );
 
 		if ( bForce )
 			InterlockedExchange( &m_nForcedUpdate, TRUE );

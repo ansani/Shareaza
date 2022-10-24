@@ -312,20 +312,20 @@ public:
 		if ( ! szAddress || ! *szAddress )
 			return NULL;
 		CQuickLock oLock( m_pSection );
-		CHostCacheMap::const_iterator i =
+		CHostCacheMap::const_iterator it_1 =
 			std::find_if( m_Hosts.begin(), m_Hosts.end(),
 			std::bind2nd( is_address(), szAddress ) );
 
-		if ( i == m_Hosts.end() )
+		if ( it_1 == m_Hosts.end() )
 		{
-			CHostCacheMapIPv6::const_iterator i =
+			CHostCacheMapIPv6::const_iterator it_2 =
 			std::find_if( m_HostsIPv6.begin(), m_HostsIPv6.end(),
 			std::bind2nd( is_address_ipv6(), szAddress ) );
 			
-			return ( i != m_HostsIPv6.end() ) ? (*i).second : NULL;
+			return ( it_2 != m_HostsIPv6.end() ) ? (*it_2).second : NULL;
 		}
 
-		return ( i != m_Hosts.end() ) ? (*i).second : NULL;
+		return ( it_1 != m_Hosts.end() ) ? (*it_1).second : NULL;
 	}
 
 	inline bool Check(const CHostCacheHostPtr pHost) const throw()

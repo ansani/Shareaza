@@ -212,7 +212,7 @@ public:
 
 	BOOL		Connect(BOOL bAutoConnect = FALSE);
 	void		Disconnect();
-	BOOL		ConnectTo(LPCTSTR pszAddress, int nPort = 0, PROTOCOLID nProtocol = PROTOCOL_NULL, BOOL bNoUltraPeer = FALSE);
+	BOOL		ConnectTo(LPCTSTR pszAddress, u_short nPort = 0, PROTOCOLID nProtocol = PROTOCOL_NULL, BOOL bNoUltraPeer = FALSE);
 	BOOL		AcquireLocalAddress(SOCKET hSocket, bool bPort = false, const IN_ADDR* pFromAddress = NULL, const IN6_ADDR* pFromIPv6Address = NULL);
 	BOOL		AcquireLocalAddress(LPCTSTR pszHeader, WORD nPort = 0, const IN_ADDR* pFromAddress = NULL, const IN6_ADDR* pFromIPv6Address = NULL);
 	BOOL		AcquireLocalAddress(const IN_ADDR& pAddress, WORD nPort = 0, const IN_ADDR* pFromAddress = NULL);

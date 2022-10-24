@@ -930,7 +930,7 @@ BOOL CDCNeighbour::OnForceMove(LPSTR szParams)
 
 	if ( LPSTR szAddress = szParams )
 	{
-		int nPort = protocolPorts[ PROTOCOL_DC ];
+		u_short nPort = protocolPorts[ PROTOCOL_DC ];
 		if ( LPSTR szPort = strchr( szAddress, ':' ) )
 		{
 			*szPort++ = 0;

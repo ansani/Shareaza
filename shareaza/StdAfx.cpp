@@ -73,7 +73,7 @@ const UINT protocolIDs[] =
 };
 
 // Protocol default ports
-const WORD protocolPorts[] =
+const u_short protocolPorts[] =
 {
 	6346,	// Unknown
 	6346,	// Gnutella
