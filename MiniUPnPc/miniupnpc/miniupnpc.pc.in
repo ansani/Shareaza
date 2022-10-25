@@ -1,8 +1,8 @@
 # this template is filled-in by CMake `configure_file(... @ONLY)`
-# the `@....@` are filled in by CMake configure_file(), 
+# the `@....@` are filled in by CMake configure_file(),
 # from variables set in your CMakeLists.txt or by CMake itself
 #
-# Good tutoral for understanding .pc files: 
+# Good tutoral for understanding .pc files:
 # https://people.freedesktop.org/~dbn/pkg-config-guide.html
 
 prefix="@CMAKE_INSTALL_PREFIX@"

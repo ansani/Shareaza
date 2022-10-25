@@ -178,4 +178,3 @@ upnpcommands.o:	$(SRCDIR)/upnpcommands.c include/upnpcommands.h include/upnprepl
 minissdpc.o:	$(SRCDIR)/minissdpc.c $(SRCDIR)/minissdpc.h $(SRCDIR)/receivedata.h
 
 upnpdev.o:	$(SRCDIR)/upnpdev.c include/upnpdev.h
-

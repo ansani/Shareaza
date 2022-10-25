@@ -26,7 +26,7 @@ strComputer = "."
 Set objWMIService = GetObject("winmgmts:" & "{impersonationLevel=impersonate}!\\" & strComputer & "\root\cimv2")
 Set colOperatingSystems = objWMIService.ExecQuery ("Select * from Win32_OperatingSystem")
 For Each objOperatingSystem in colOperatingSystems
-    'Wscript.Echo objOperatingSystem.Caption & " -- " 
+    'Wscript.Echo objOperatingSystem.Caption & " -- "
 	os_version = objOperatingSystem.Version
 Next
 

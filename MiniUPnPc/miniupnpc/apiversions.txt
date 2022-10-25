@@ -175,4 +175,3 @@ struct UPNPDev {
 };
 struct UPNPDev * upnpDiscover(int delay, const char * multicastif,
                               const char * minissdpdsock);
-
