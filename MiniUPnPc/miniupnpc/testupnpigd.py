@@ -31,6 +31,7 @@ def list_redirections():
 
 
 class handler_class(BaseHTTPRequestHandler):
+
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
@@ -69,10 +70,8 @@ try:
         eport = eport + 1
         r = u.getspecificportmapping(eport, "TCP")
 
-    print(
-        "trying to redirect %s port %u TCP => %s port %u TCP"
-        % (externalipaddress, eport, u.lanaddr, httpd.server_port)
-    )
+    print("trying to redirect %s port %u TCP => %s port %u TCP" %
+          (externalipaddress, eport, u.lanaddr, httpd.server_port))
 
     b = u.addportmapping(
         eport,
@@ -83,10 +82,8 @@ try:
         "",
     )
     if b:
-        print(
-            "Success. Now waiting for some HTTP request on http://%s:%u"
-            % (externalipaddress, eport)
-        )
+        print("Success. Now waiting for some HTTP request on http://%s:%u" %
+              (externalipaddress, eport))
         try:
             httpd.handle_request()
             httpd.server_close()

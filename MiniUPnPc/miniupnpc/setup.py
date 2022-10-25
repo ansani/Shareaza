@@ -18,6 +18,7 @@ EXT = ["build/libminiupnpc.a"]
 
 
 class make_then_build_ext(build_ext.build_ext):
+
     def run(self):
         subprocess.check_call([os.environ.get("MAKE", "make")] + EXT)
         build_ext.build_ext.run(self)

@@ -64,8 +64,10 @@ except Exception as e:
 print("local ip address :", u.lanaddr)
 print("external ip address :", u.externalipaddress())
 print(u.statusinfo(), u.connectiontype())
-print("total bytes : sent", u.totalbytesent(), "received", u.totalbytereceived())
-print("total packets : sent", u.totalpacketsent(), "received", u.totalpacketreceived())
+print("total bytes : sent", u.totalbytesent(), "received",
+      u.totalbytereceived())
+print("total packets : sent", u.totalpacketsent(), "received",
+      u.totalpacketreceived())
 
 # print u.addportmapping(64000, 'TCP',
 #                       '192.168.1.166', 63000, 'port mapping test', '')
