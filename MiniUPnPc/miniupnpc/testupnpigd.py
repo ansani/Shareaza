@@ -26,6 +26,7 @@ def list_redirections():
         print(i, p)
         i = i + 1
 
+
 # define the handler class for HTTP connections
 
 
@@ -46,16 +47,16 @@ u = miniupnpc.UPnP()
 u.discoverdelay = 200
 
 try:
-    print('Discovering... delay=%ums' % u.discoverdelay)
+    print("Discovering... delay=%ums" % u.discoverdelay)
     ndevices = u.discover()
-    print(ndevices, 'device(s) detected')
+    print(ndevices, "device(s) detected")
 
     # select an igd
     u.selectigd()
     # display information about the IGD and the internet connection
-    print('local ip address :', u.lanaddr)
+    print("local ip address :", u.lanaddr)
     externalipaddress = u.externalipaddress()
-    print('external ip address :', externalipaddress)
+    print("external ip address :", externalipaddress)
     print(u.statusinfo(), u.connectiontype())
 
     # instanciate a HTTPd object. The port is assigned by the system.
@@ -63,33 +64,43 @@ try:
     eport = httpd.server_port
 
     # find a free port for the redirection
-    r = u.getspecificportmapping(eport, 'TCP')
+    r = u.getspecificportmapping(eport, "TCP")
     while r != None and eport < 65536:
         eport = eport + 1
-        r = u.getspecificportmapping(eport, 'TCP')
+        r = u.getspecificportmapping(eport, "TCP")
 
-    print('trying to redirect %s port %u TCP => %s port %u TCP' %
-          (externalipaddress, eport, u.lanaddr, httpd.server_port))
+    print(
+        "trying to redirect %s port %u TCP => %s port %u TCP"
+        % (externalipaddress, eport, u.lanaddr, httpd.server_port)
+    )
 
-    b = u.addportmapping(eport, 'TCP', u.lanaddr, httpd.server_port,
-                         'UPnP IGD Tester port %u' % eport, '')
+    b = u.addportmapping(
+        eport,
+        "TCP",
+        u.lanaddr,
+        httpd.server_port,
+        "UPnP IGD Tester port %u" % eport,
+        "",
+    )
     if b:
-        print('Success. Now waiting for some HTTP request on http://%s:%u' %
-              (externalipaddress, eport))
+        print(
+            "Success. Now waiting for some HTTP request on http://%s:%u"
+            % (externalipaddress, eport)
+        )
         try:
             httpd.handle_request()
             httpd.server_close()
         except KeyboardInterrupt as details:
             print("CTRL-C exception!", details)
-        b = u.deleteportmapping(eport, 'TCP')
+        b = u.deleteportmapping(eport, "TCP")
         if b:
-            print('Successfully deleted port mapping')
+            print("Successfully deleted port mapping")
         else:
-            print('Failed to remove port mapping')
+            print("Failed to remove port mapping")
     else:
-        print('Failed')
+        print("Failed")
 
     httpd.server_close()
 
 except Exception as e:
-    print('Exception :', e)
+    print("Exception :", e)

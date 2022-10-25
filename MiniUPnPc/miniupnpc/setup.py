@@ -13,24 +13,30 @@ from setuptools.command import build_ext
 import subprocess
 import os
 
-EXT = ['build/libminiupnpc.a']
+EXT = ["build/libminiupnpc.a"]
 
 
 class make_then_build_ext(build_ext.build_ext):
     def run(self):
-        subprocess.check_call([os.environ.get('MAKE', 'make')] + EXT)
+        subprocess.check_call([os.environ.get("MAKE", "make")] + EXT)
         build_ext.build_ext.run(self)
 
 
-setup(name="miniupnpc",
-      version=open('VERSION').read().strip(),
-      author='Thomas BERNARD',
-      author_email='miniupnp@free.fr',
-      license=open('LICENSE').read(),
-      url='http://miniupnp.free.fr/',
-      description='miniUPnP client',
-      cmdclass={'build_ext': make_then_build_ext},
-      ext_modules=[
-          Extension(name="miniupnpc", sources=["src/miniupnpcmodule.c"],
-                    include_dirs=['include'], extra_objects=EXT)
-      ])
+setup(
+    name="miniupnpc",
+    version=open("VERSION").read().strip(),
+    author="Thomas BERNARD",
+    author_email="miniupnp@free.fr",
+    license=open("LICENSE").read(),
+    url="http://miniupnp.free.fr/",
+    description="miniUPnP client",
+    cmdclass={"build_ext": make_then_build_ext},
+    ext_modules=[
+        Extension(
+            name="miniupnpc",
+            sources=["src/miniupnpcmodule.c"],
+            include_dirs=["include"],
+            extra_objects=EXT,
+        )
+    ],
+)
