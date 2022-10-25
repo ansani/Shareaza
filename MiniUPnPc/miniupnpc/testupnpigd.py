@@ -4,11 +4,10 @@
 # Author : Thomas Bernard
 # This Sample code is public domain.
 # website : https://miniupnp.tuxfamily.org/
-
 import socket
 
-# import the python miniupnpc module
 import miniupnpc
+# import the python miniupnpc module
 
 try:
     from http.server import BaseHTTPRequestHandler, HTTPServer

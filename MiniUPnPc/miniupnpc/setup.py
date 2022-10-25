@@ -7,11 +7,11 @@
 # python script to build the miniupnpc module under unix
 #
 # Uses MAKE environment variable (defaulting to 'make')
-
 import os
 import subprocess
 
-from setuptools import Extension, setup
+from setuptools import Extension
+from setuptools import setup
 from setuptools.command import build_ext
 
 EXT = ["build/libminiupnpc.a"]

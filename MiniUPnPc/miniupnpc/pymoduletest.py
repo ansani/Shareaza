@@ -5,11 +5,10 @@
 # Python 3
 # This Sample code is public domain.
 # website : https://miniupnp.tuxfamily.org/
-
 import sys
 
-# import the python miniupnpc module
 import miniupnpc
+# import the python miniupnpc module
 
 try:
     import argparse
