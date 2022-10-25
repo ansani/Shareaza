@@ -13,19 +13,19 @@ extern "C" {
 #endif
 
 struct NameValue {
-	struct NameValue * l_next;
-	char name[64];
-	char value[128];
+    struct NameValue * l_next;
+    char name[64];
+    char value[128];
 };
 
 struct NameValueParserData {
-	struct NameValue * l_head;
-	char curelt[64];
-	char * portListing;
-	int portListingLength;
-	int topelt;
-	const char * cdata;
-	int cdatalen;
+    struct NameValue * l_head;
+    char curelt[64];
+    char * portListing;
+    int portListingLength;
+    int topelt;
+    const char * cdata;
+    int cdatalen;
 };
 
 /* ParseNameValue() */

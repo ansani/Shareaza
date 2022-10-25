@@ -28,27 +28,28 @@ extern "C" {
   </p:PortMappingEntry>
  */
 typedef enum { PortMappingEltNone,
-       PortMappingEntry, NewRemoteHost,
-       NewExternalPort, NewProtocol,
-       NewInternalPort, NewInternalClient,
-       NewEnabled, NewDescription,
-       NewLeaseTime } portMappingElt;
+               PortMappingEntry, NewRemoteHost,
+               NewExternalPort, NewProtocol,
+               NewInternalPort, NewInternalClient,
+               NewEnabled, NewDescription,
+               NewLeaseTime
+             } portMappingElt;
 
 struct PortMapping {
-	struct PortMapping * l_next;	/* list next element */
-	UNSIGNED_INTEGER leaseTime;
-	unsigned short externalPort;
-	unsigned short internalPort;
-	char remoteHost[64];
-	char internalClient[64];
-	char description[64];
-	char protocol[4];
-	unsigned char enabled;
+    struct PortMapping * l_next;	/* list next element */
+    UNSIGNED_INTEGER leaseTime;
+    unsigned short externalPort;
+    unsigned short internalPort;
+    char remoteHost[64];
+    char internalClient[64];
+    char description[64];
+    char protocol[4];
+    unsigned char enabled;
 };
 
 struct PortMappingParserData {
-	struct PortMapping * l_head;	/* list head */
-	portMappingElt curelt;
+    struct PortMapping * l_head;	/* list head */
+    portMappingElt curelt;
 };
 
 MINIUPNP_LIBSPEC void

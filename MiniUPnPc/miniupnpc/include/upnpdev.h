@@ -15,19 +15,19 @@ extern "C" {
 #endif
 
 struct UPNPDev {
-	struct UPNPDev * pNext;
-	char * descURL;
-	char * st;
-	char * usn;
-	unsigned int scope_id;
+    struct UPNPDev * pNext;
+    char * descURL;
+    char * st;
+    char * usn;
+    unsigned int scope_id;
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
-	/* C99 flexible array member */
-	char buffer[];
+    /* C99 flexible array member */
+    char buffer[];
 #elif defined(__GNUC__)
-	char buffer[0];
+    char buffer[0];
 #else
-	/* Fallback to a hack */
-	char buffer[1];
+    /* Fallback to a hack */
+    char buffer[1];
 #endif
 };
 

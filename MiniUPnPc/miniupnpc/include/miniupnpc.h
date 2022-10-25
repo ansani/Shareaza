@@ -34,7 +34,10 @@ extern "C" {
 #endif
 
 /* Structures definitions : */
-struct UPNParg { const char * elt; const char * val; };
+struct UPNParg {
+    const char * elt;
+    const char * val;
+};
 
 char *
 simpleUPnPcommand(int, const char *, const char *,
@@ -73,9 +76,9 @@ upnpDiscoverAll(int delay, const char * multicastif,
 
 MINIUPNP_LIBSPEC struct UPNPDev *
 upnpDiscoverDevice(const char * device, int delay, const char * multicastif,
-                const char * minissdpdsock, int localport,
-                int ipv6, unsigned char ttl,
-                int * error);
+                   const char * minissdpdsock, int localport,
+                   int ipv6, unsigned char ttl,
+                   int * error);
 
 MINIUPNP_LIBSPEC struct UPNPDev *
 upnpDiscoverDevices(const char * const deviceTypes[],
@@ -97,11 +100,11 @@ MINIUPNP_LIBSPEC void parserootdesc(const char *, int, struct IGDdatas *);
  * controlURL_6FC: controlURL of the WANIPv6FirewallControl
  */
 struct UPNPUrls {
-	char * controlURL;
-	char * ipcondescURL;
-	char * controlURL_CIF;
-	char * controlURL_6FC;
-	char * rootdescURL;
+    char * controlURL;
+    char * ipcondescURL;
+    char * controlURL_CIF;
+    char * controlURL_6FC;
+    char * rootdescURL;
 };
 
 /* UPNP_GetValidIGD() :
@@ -119,8 +122,8 @@ struct UPNPUrls {
 MINIUPNP_LIBSPEC int
 UPNP_GetValidIGD(struct UPNPDev * devlist,
                  struct UPNPUrls * urls,
-				 struct IGDdatas * data,
-				 char * lanaddr, int lanaddrlen);
+                 struct IGDdatas * data,
+                 char * lanaddr, int lanaddrlen);
 
 /* UPNP_GetIGDFromUrl()
  * Used when skipping the discovery process.

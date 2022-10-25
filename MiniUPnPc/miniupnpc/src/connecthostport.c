@@ -57,228 +57,228 @@
 SOCKET connecthostport(const char * host, unsigned short port,
                        unsigned int scope_id)
 {
-	SOCKET s;
-	int n;
+    SOCKET s;
+    int n;
 #ifdef USE_GETHOSTBYNAME
-	struct sockaddr_in dest;
-	struct hostent *hp;
+    struct sockaddr_in dest;
+    struct hostent *hp;
 #else /* #ifdef USE_GETHOSTBYNAME */
-	char tmp_host[MAXHOSTNAMELEN+1];
-	char port_str[8];
-	struct addrinfo *ai, *p;
-	struct addrinfo hints;
+    char tmp_host[MAXHOSTNAMELEN+1];
+    char port_str[8];
+    struct addrinfo *ai, *p;
+    struct addrinfo hints;
 #endif /* #ifdef USE_GETHOSTBYNAME */
 #ifdef MINIUPNPC_SET_SOCKET_TIMEOUT
-	struct timeval timeout;
+    struct timeval timeout;
 #endif /* #ifdef MINIUPNPC_SET_SOCKET_TIMEOUT */
 
 #ifdef USE_GETHOSTBYNAME
-	hp = gethostbyname(host);
-	if(hp == NULL)
-	{
-		herror(host);
-		return INVALID_SOCKET;
-	}
-	memcpy(&dest.sin_addr, hp->h_addr, sizeof(dest.sin_addr));
-	memset(dest.sin_zero, 0, sizeof(dest.sin_zero));
-	s = socket(PF_INET, SOCK_STREAM, 0);
-	if(ISINVALID(s))
-	{
-		PRINT_SOCKET_ERROR("socket");
-		return INVALID_SOCKET;
-	}
+    hp = gethostbyname(host);
+    if(hp == NULL)
+    {
+        herror(host);
+        return INVALID_SOCKET;
+    }
+    memcpy(&dest.sin_addr, hp->h_addr, sizeof(dest.sin_addr));
+    memset(dest.sin_zero, 0, sizeof(dest.sin_zero));
+    s = socket(PF_INET, SOCK_STREAM, 0);
+    if(ISINVALID(s))
+    {
+        PRINT_SOCKET_ERROR("socket");
+        return INVALID_SOCKET;
+    }
 #ifdef MINIUPNPC_SET_SOCKET_TIMEOUT
-	/* setting a 3 seconds timeout for the connect() call */
-	timeout.tv_sec = 3;
-	timeout.tv_usec = 0;
-	if(setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(struct timeval)) < 0)
-	{
-		PRINT_SOCKET_ERROR("setsockopt SO_RCVTIMEO");
-	}
-	timeout.tv_sec = 3;
-	timeout.tv_usec = 0;
-	if(setsockopt(s, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(struct timeval)) < 0)
-	{
-		PRINT_SOCKET_ERROR("setsockopt SO_SNDTIMEO");
-	}
+    /* setting a 3 seconds timeout for the connect() call */
+    timeout.tv_sec = 3;
+    timeout.tv_usec = 0;
+    if(setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(struct timeval)) < 0)
+    {
+        PRINT_SOCKET_ERROR("setsockopt SO_RCVTIMEO");
+    }
+    timeout.tv_sec = 3;
+    timeout.tv_usec = 0;
+    if(setsockopt(s, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(struct timeval)) < 0)
+    {
+        PRINT_SOCKET_ERROR("setsockopt SO_SNDTIMEO");
+    }
 #endif /* #ifdef MINIUPNPC_SET_SOCKET_TIMEOUT */
-	dest.sin_family = AF_INET;
-	dest.sin_port = htons(port);
-	n = connect(s, (struct sockaddr *)&dest, sizeof(struct sockaddr_in));
+    dest.sin_family = AF_INET;
+    dest.sin_port = htons(port);
+    n = connect(s, (struct sockaddr *)&dest, sizeof(struct sockaddr_in));
 #ifdef MINIUPNPC_IGNORE_EINTR
-	/* EINTR The system call was interrupted by a signal that was caught
-	 * EINPROGRESS The socket is nonblocking and the connection cannot
-	 *             be completed immediately. */
-	while(n < 0 && (errno == EINTR || errno == EINPROGRESS))
-	{
-		socklen_t len;
-		fd_set wset;
-		int err;
-		FD_ZERO(&wset);
-		FD_SET(s, &wset);
+    /* EINTR The system call was interrupted by a signal that was caught
+     * EINPROGRESS The socket is nonblocking and the connection cannot
+     *             be completed immediately. */
+    while(n < 0 && (errno == EINTR || errno == EINPROGRESS))
+    {
+        socklen_t len;
+        fd_set wset;
+        int err;
+        FD_ZERO(&wset);
+        FD_SET(s, &wset);
 #ifdef MINIUPNPC_SET_SOCKET_TIMEOUT
-		timeout.tv_sec = 3;
-		timeout.tv_usec = 0;
-		n = select(s + 1, NULL, &wset, NULL, &timeout);
+        timeout.tv_sec = 3;
+        timeout.tv_usec = 0;
+        n = select(s + 1, NULL, &wset, NULL, &timeout);
 #else
-		n = select(s + 1, NULL, &wset, NULL, NULL);
+        n = select(s + 1, NULL, &wset, NULL, NULL);
 #endif
-		if(n == -1 && errno == EINTR)
-			continue;
+        if(n == -1 && errno == EINTR)
+            continue;
 #ifdef MINIUPNPC_SET_SOCKET_TIMEOUT
-		if(n == 0) {
-			errno = ETIMEDOUT;
-			n = -1;
-			break;
-		}
+        if(n == 0) {
+            errno = ETIMEDOUT;
+            n = -1;
+            break;
+        }
 #endif
-		/*len = 0;*/
-		/*n = getpeername(s, NULL, &len);*/
-		len = sizeof(err);
-		if(getsockopt(s, SOL_SOCKET, SO_ERROR, &err, &len) < 0) {
-			PRINT_SOCKET_ERROR("getsockopt");
-			closesocket(s);
-			return INVALID_SOCKET;
-		}
-		if(err != 0) {
-			errno = err;
-			n = -1;
-		}
-	}
+        /*len = 0;*/
+        /*n = getpeername(s, NULL, &len);*/
+        len = sizeof(err);
+        if(getsockopt(s, SOL_SOCKET, SO_ERROR, &err, &len) < 0) {
+            PRINT_SOCKET_ERROR("getsockopt");
+            closesocket(s);
+            return INVALID_SOCKET;
+        }
+        if(err != 0) {
+            errno = err;
+            n = -1;
+        }
+    }
 #endif /* #ifdef MINIUPNPC_IGNORE_EINTR */
-	if(n<0)
-	{
-		PRINT_SOCKET_ERROR("connect");
-		closesocket(s);
-		return INVALID_SOCKET;
-	}
+    if(n<0)
+    {
+        PRINT_SOCKET_ERROR("connect");
+        closesocket(s);
+        return INVALID_SOCKET;
+    }
 #else /* #ifdef USE_GETHOSTBYNAME */
-	/* use getaddrinfo() instead of gethostbyname() */
-	memset(&hints, 0, sizeof(hints));
-	/* hints.ai_flags = AI_ADDRCONFIG; */
+    /* use getaddrinfo() instead of gethostbyname() */
+    memset(&hints, 0, sizeof(hints));
+    /* hints.ai_flags = AI_ADDRCONFIG; */
 #ifdef AI_NUMERICSERV
-	hints.ai_flags = AI_NUMERICSERV;
+    hints.ai_flags = AI_NUMERICSERV;
 #endif
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_family = AF_UNSPEC; /* AF_INET, AF_INET6 or AF_UNSPEC */
-	/* hints.ai_protocol = IPPROTO_TCP; */
-	snprintf(port_str, sizeof(port_str), "%hu", port);
-	if(host[0] == '[')
-	{
-		/* literal ip v6 address */
-		int i, j;
-		for(i = 0, j = 1; host[j] && (host[j] != ']') && i < MAXHOSTNAMELEN; i++, j++)
-		{
-			tmp_host[i] = host[j];
-			if(0 == strncmp(host+j, "%25", 3))	/* %25 is just url encoding for '%' */
-				j+=2;							/* skip "25" */
-		}
-		tmp_host[i] = '\0';
-	}
-	else
-	{
-		strncpy(tmp_host, host, MAXHOSTNAMELEN);
-	}
-	tmp_host[MAXHOSTNAMELEN] = '\0';
-	n = getaddrinfo(tmp_host, port_str, &hints, &ai);
-	if(n != 0)
-	{
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_family = AF_UNSPEC; /* AF_INET, AF_INET6 or AF_UNSPEC */
+    /* hints.ai_protocol = IPPROTO_TCP; */
+    snprintf(port_str, sizeof(port_str), "%hu", port);
+    if(host[0] == '[')
+    {
+        /* literal ip v6 address */
+        int i, j;
+        for(i = 0, j = 1; host[j] && (host[j] != ']') && i < MAXHOSTNAMELEN; i++, j++)
+        {
+            tmp_host[i] = host[j];
+            if(0 == strncmp(host+j, "%25", 3))	/* %25 is just url encoding for '%' */
+                j+=2;							/* skip "25" */
+        }
+        tmp_host[i] = '\0';
+    }
+    else
+    {
+        strncpy(tmp_host, host, MAXHOSTNAMELEN);
+    }
+    tmp_host[MAXHOSTNAMELEN] = '\0';
+    n = getaddrinfo(tmp_host, port_str, &hints, &ai);
+    if(n != 0)
+    {
 #ifdef _WIN32
-		fprintf(stderr, "getaddrinfo() error : %d\n", n);
+        fprintf(stderr, "getaddrinfo() error : %d\n", n);
 #else
-		fprintf(stderr, "getaddrinfo() error : %s\n", gai_strerror(n));
+        fprintf(stderr, "getaddrinfo() error : %s\n", gai_strerror(n));
 #endif
-		return INVALID_SOCKET;
-	}
-	s = INVALID_SOCKET;
-	for(p = ai; p; p = p->ai_next)
-	{
-		if(!ISINVALID(s))
-			closesocket(s);
+        return INVALID_SOCKET;
+    }
+    s = INVALID_SOCKET;
+    for(p = ai; p; p = p->ai_next)
+    {
+        if(!ISINVALID(s))
+            closesocket(s);
 #ifdef DEBUG
-		printf("ai_family=%d ai_socktype=%d ai_protocol=%d (PF_INET=%d, PF_INET6=%d)\n",
-		       p->ai_family, p->ai_socktype, p->ai_protocol, PF_INET, PF_INET6);
+        printf("ai_family=%d ai_socktype=%d ai_protocol=%d (PF_INET=%d, PF_INET6=%d)\n",
+               p->ai_family, p->ai_socktype, p->ai_protocol, PF_INET, PF_INET6);
 #endif
-		s = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-		if(ISINVALID(s))
-			continue;
-		if(p->ai_addr->sa_family == AF_INET6 && scope_id > 0) {
-			struct sockaddr_in6 * addr6 = (struct sockaddr_in6 *)p->ai_addr;
-			addr6->sin6_scope_id = scope_id;
-		}
+        s = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+        if(ISINVALID(s))
+            continue;
+        if(p->ai_addr->sa_family == AF_INET6 && scope_id > 0) {
+            struct sockaddr_in6 * addr6 = (struct sockaddr_in6 *)p->ai_addr;
+            addr6->sin6_scope_id = scope_id;
+        }
 #ifdef MINIUPNPC_SET_SOCKET_TIMEOUT
-		/* setting a 3 seconds timeout for the connect() call */
-		timeout.tv_sec = 3;
-		timeout.tv_usec = 0;
-		if(setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(struct timeval)) < 0)
-		{
-			PRINT_SOCKET_ERROR("setsockopt");
-		}
-		timeout.tv_sec = 3;
-		timeout.tv_usec = 0;
-		if(setsockopt(s, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(struct timeval)) < 0)
-		{
-			PRINT_SOCKET_ERROR("setsockopt");
-		}
+        /* setting a 3 seconds timeout for the connect() call */
+        timeout.tv_sec = 3;
+        timeout.tv_usec = 0;
+        if(setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(struct timeval)) < 0)
+        {
+            PRINT_SOCKET_ERROR("setsockopt");
+        }
+        timeout.tv_sec = 3;
+        timeout.tv_usec = 0;
+        if(setsockopt(s, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(struct timeval)) < 0)
+        {
+            PRINT_SOCKET_ERROR("setsockopt");
+        }
 #endif /* #ifdef MINIUPNPC_SET_SOCKET_TIMEOUT */
-		n = connect(s, p->ai_addr, MSC_CAST_INT p->ai_addrlen);
+        n = connect(s, p->ai_addr, MSC_CAST_INT p->ai_addrlen);
 #ifdef MINIUPNPC_IGNORE_EINTR
-		/* EINTR The system call was interrupted by a signal that was caught
-		 * EINPROGRESS The socket is nonblocking and the connection cannot
-		 *             be completed immediately. */
-		while(n < 0 && (errno == EINTR || errno == EINPROGRESS))
-		{
-			socklen_t len;
-			fd_set wset;
-			int err;
-			FD_ZERO(&wset);
-			FD_SET(s, &wset);
+        /* EINTR The system call was interrupted by a signal that was caught
+         * EINPROGRESS The socket is nonblocking and the connection cannot
+         *             be completed immediately. */
+        while(n < 0 && (errno == EINTR || errno == EINPROGRESS))
+        {
+            socklen_t len;
+            fd_set wset;
+            int err;
+            FD_ZERO(&wset);
+            FD_SET(s, &wset);
 #ifdef MINIUPNPC_SET_SOCKET_TIMEOUT
-			timeout.tv_sec = 3;
-			timeout.tv_usec = 0;
-			n = select(s + 1, NULL, &wset, NULL, &timeout);
+            timeout.tv_sec = 3;
+            timeout.tv_usec = 0;
+            n = select(s + 1, NULL, &wset, NULL, &timeout);
 #else
-			n = select(s + 1, NULL, &wset, NULL, NULL);
+            n = select(s + 1, NULL, &wset, NULL, NULL);
 #endif
-			if(n == -1 && errno == EINTR)
-				continue;
+            if(n == -1 && errno == EINTR)
+                continue;
 #ifdef MINIUPNPC_SET_SOCKET_TIMEOUT
-			if(n == 0) {
-				errno = ETIMEDOUT;
-				n = -1;
-				break;
-			}
+            if(n == 0) {
+                errno = ETIMEDOUT;
+                n = -1;
+                break;
+            }
 #endif
-			/*len = 0;*/
-			/*n = getpeername(s, NULL, &len);*/
-			len = sizeof(err);
-			if(getsockopt(s, SOL_SOCKET, SO_ERROR, &err, &len) < 0) {
-				PRINT_SOCKET_ERROR("getsockopt");
-				closesocket(s);
-				freeaddrinfo(ai);
-				return INVALID_SOCKET;
-			}
-			if(err != 0) {
-				errno = err;
-				n = -1;
-			}
-		}
+            /*len = 0;*/
+            /*n = getpeername(s, NULL, &len);*/
+            len = sizeof(err);
+            if(getsockopt(s, SOL_SOCKET, SO_ERROR, &err, &len) < 0) {
+                PRINT_SOCKET_ERROR("getsockopt");
+                closesocket(s);
+                freeaddrinfo(ai);
+                return INVALID_SOCKET;
+            }
+            if(err != 0) {
+                errno = err;
+                n = -1;
+            }
+        }
 #endif /* #ifdef MINIUPNPC_IGNORE_EINTR */
-		if(n >= 0)	/* connect() was successful */
-			break;
-	}
-	freeaddrinfo(ai);
-	if(ISINVALID(s))
-	{
-		PRINT_SOCKET_ERROR("socket");
-		return INVALID_SOCKET;
-	}
-	if(n < 0)
-	{
-		PRINT_SOCKET_ERROR("connect");
-		closesocket(s);
-		return INVALID_SOCKET;
-	}
+        if(n >= 0)	/* connect() was successful */
+            break;
+    }
+    freeaddrinfo(ai);
+    if(ISINVALID(s))
+    {
+        PRINT_SOCKET_ERROR("socket");
+        return INVALID_SOCKET;
+    }
+    if(n < 0)
+    {
+        PRINT_SOCKET_ERROR("connect");
+        closesocket(s);
+        return INVALID_SOCKET;
+    }
 #endif /* #ifdef USE_GETHOSTBYNAME */
-	return s;
+    return s;
 }

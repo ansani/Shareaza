@@ -35,12 +35,12 @@ receivedata(SOCKET socket,
             int timeout, unsigned int * scope_id)
 {
 #ifdef MINIUPNPC_GET_SRC_ADDR
-	struct sockaddr_storage src_addr;
-	socklen_t src_addr_len = sizeof(src_addr);
+    struct sockaddr_storage src_addr;
+    socklen_t src_addr_len = sizeof(src_addr);
 #endif	/* MINIUPNPC_GET_SRC_ADDR */
     int n;
 #if !defined(_WIN32) && !defined(__amigaos__) && !defined(__amigaos4__)
-	/* using poll */
+    /* using poll */
     struct pollfd fds[1]; /* for the poll */
 #ifdef MINIUPNPC_IGNORE_EINTR
     do {
@@ -55,11 +55,11 @@ receivedata(SOCKET socket,
         PRINT_SOCKET_ERROR("poll");
         return -1;
     } else if(n == 0) {
-		/* timeout */
+        /* timeout */
         return 0;
     }
 #else	/* !defined(_WIN32) && !defined(__amigaos__) && !defined(__amigaos4__) */
-	/* using select under _WIN32 and amigaos */
+    /* using select under _WIN32 and amigaos */
     fd_set socketSet;
     TIMEVAL timeval;
     FD_ZERO(&socketSet);
@@ -75,31 +75,31 @@ receivedata(SOCKET socket,
     }
 #endif	/* !defined(_WIN32) && !defined(__amigaos__) && !defined(__amigaos4__) */
 #ifdef MINIUPNPC_GET_SRC_ADDR
-	memset(&src_addr, 0, sizeof(src_addr));
-	n = recvfrom(socket, data, length, 0,
-	             (struct sockaddr *)&src_addr, &src_addr_len);
+    memset(&src_addr, 0, sizeof(src_addr));
+    n = recvfrom(socket, data, length, 0,
+                 (struct sockaddr *)&src_addr, &src_addr_len);
 #else	/* MINIUPNPC_GET_SRC_ADDR */
-	n = recv(socket, data, length, 0);
+    n = recv(socket, data, length, 0);
 #endif	/* MINIUPNPC_GET_SRC_ADDR */
-	if(n<0) {
-		PRINT_SOCKET_ERROR("recv");
-	}
+    if(n<0) {
+        PRINT_SOCKET_ERROR("recv");
+    }
 #ifdef MINIUPNPC_GET_SRC_ADDR
-	if (src_addr.ss_family == AF_INET6) {
-		const struct sockaddr_in6 * src_addr6 = (struct sockaddr_in6 *)&src_addr;
+    if (src_addr.ss_family == AF_INET6) {
+        const struct sockaddr_in6 * src_addr6 = (struct sockaddr_in6 *)&src_addr;
 #ifdef DEBUG
-		printf("scope_id=%u\n", src_addr6->sin6_scope_id);
+        printf("scope_id=%u\n", src_addr6->sin6_scope_id);
 #endif	/* DEBUG */
-		if(scope_id)
-			*scope_id = src_addr6->sin6_scope_id;
-	} else {
-		if(scope_id)
-			*scope_id = 0;
-	}
+        if(scope_id)
+            *scope_id = src_addr6->sin6_scope_id;
+    } else {
+        if(scope_id)
+            *scope_id = 0;
+    }
 #else	/* MINIUPNPC_GET_SRC_ADDR */
-	if(scope_id)
-		*scope_id = 0;
+    if(scope_id)
+        *scope_id = 0;
 #endif	/* MINIUPNPC_GET_SRC_ADDR */
-	return n;
+    return n;
 }
 

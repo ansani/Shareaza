@@ -26,19 +26,19 @@ struct PortMappingParserData;
 
 MINIUPNP_LIBSPEC UNSIGNED_INTEGER
 UPNP_GetTotalBytesSent(const char * controlURL,
-					const char * servicetype);
+                       const char * servicetype);
 
 MINIUPNP_LIBSPEC UNSIGNED_INTEGER
 UPNP_GetTotalBytesReceived(const char * controlURL,
-						const char * servicetype);
+                           const char * servicetype);
 
 MINIUPNP_LIBSPEC UNSIGNED_INTEGER
 UPNP_GetTotalPacketsSent(const char * controlURL,
-					const char * servicetype);
+                         const char * servicetype);
 
 MINIUPNP_LIBSPEC UNSIGNED_INTEGER
 UPNP_GetTotalPacketsReceived(const char * controlURL,
-					const char * servicetype);
+                             const char * servicetype);
 
 /* UPNP_GetStatusInfo()
  * status and lastconnerror are 64 byte buffers
@@ -47,9 +47,9 @@ UPNP_GetTotalPacketsReceived(const char * controlURL,
  * or a UPnP Error code */
 MINIUPNP_LIBSPEC int
 UPNP_GetStatusInfo(const char * controlURL,
-			       const char * servicetype,
-				   char * status,
-				   unsigned int * uptime,
+                   const char * servicetype,
+                   char * status,
+                   unsigned int * uptime,
                    char * lastconnerror);
 
 /* UPNP_GetConnectionTypeInfo()
@@ -60,7 +60,7 @@ UPNP_GetStatusInfo(const char * controlURL,
 MINIUPNP_LIBSPEC int
 UPNP_GetConnectionTypeInfo(const char * controlURL,
                            const char * servicetype,
-						   char * connectionType);
+                           char * connectionType);
 
 /* UPNP_GetExternalIPAddress() call the corresponding UPNP method.
  * if the third arg is not null the value is copied to it.
@@ -86,9 +86,9 @@ UPNP_GetExternalIPAddress(const char * controlURL,
  * or a UPnP Error Code. */
 MINIUPNP_LIBSPEC int
 UPNP_GetLinkLayerMaxBitRates(const char* controlURL,
-							const char* servicetype,
-							unsigned int * bitrateDown,
-							unsigned int * bitrateUp);
+                             const char* servicetype,
+                             unsigned int * bitrateDown,
+                             unsigned int * bitrateUp);
 
 /* UPNP_AddPortMapping()
  * if desc is NULL, it will be defaulted to "libminiupnpc"
@@ -125,13 +125,13 @@ UPNP_GetLinkLayerMaxBitRates(const char* controlURL,
  */
 MINIUPNP_LIBSPEC int
 UPNP_AddPortMapping(const char * controlURL, const char * servicetype,
-		    const char * extPort,
-		    const char * inPort,
-		    const char * inClient,
-		    const char * desc,
-		    const char * proto,
-		    const char * remoteHost,
-		    const char * leaseDuration);
+                    const char * extPort,
+                    const char * inPort,
+                    const char * inClient,
+                    const char * desc,
+                    const char * proto,
+                    const char * remoteHost,
+                    const char * leaseDuration);
 
 /* UPNP_AddAnyPortMapping()
  * if desc is NULL, it will be defaulted to "libminiupnpc"
@@ -158,14 +158,14 @@ UPNP_AddPortMapping(const char * controlURL, const char * servicetype,
  */
 MINIUPNP_LIBSPEC int
 UPNP_AddAnyPortMapping(const char * controlURL, const char * servicetype,
-		       const char * extPort,
-		       const char * inPort,
-		       const char * inClient,
-		       const char * desc,
-		       const char * proto,
-		       const char * remoteHost,
-		       const char * leaseDuration,
-		       char * reservedPort);
+                       const char * extPort,
+                       const char * inPort,
+                       const char * inClient,
+                       const char * desc,
+                       const char * proto,
+                       const char * remoteHost,
+                       const char * leaseDuration,
+                       char * reservedPort);
 
 /* UPNP_DeletePortMapping()
  * Use same argument values as what was used for AddPortMapping().
@@ -181,8 +181,8 @@ UPNP_AddAnyPortMapping(const char * controlURL, const char * servicetype,
  * 714 NoSuchEntryInArray - The specified value does not exist in the array */
 MINIUPNP_LIBSPEC int
 UPNP_DeletePortMapping(const char * controlURL, const char * servicetype,
-		       const char * extPort, const char * proto,
-		       const char * remoteHost);
+                       const char * extPort, const char * proto,
+                       const char * remoteHost);
 
 /* UPNP_DeletePortRangeMapping()
  * Use same argument values as what was used for AddPortMapping().
@@ -199,9 +199,9 @@ UPNP_DeletePortMapping(const char * controlURL, const char * servicetype,
  * 733 InconsistentParameters - NewStartPort and NewEndPort values are not consistent. */
 MINIUPNP_LIBSPEC int
 UPNP_DeletePortMappingRange(const char * controlURL, const char * servicetype,
-        		    const char * extPortStart, const char * extPortEnd,
-        		    const char * proto,
-        		    const char * manage);
+                            const char * extPortStart, const char * extPortEnd,
+                            const char * proto,
+                            const char * manage);
 
 /* UPNP_GetPortMappingNumberOfEntries()
  * not supported by all routers */
@@ -270,15 +270,15 @@ UPNP_GetSpecificPortMappingEntry(const char * controlURL,
 MINIUPNP_LIBSPEC int
 UPNP_GetGenericPortMappingEntry(const char * controlURL,
                                 const char * servicetype,
-								const char * index,
-								char * extPort,
-								char * intClient,
-								char * intPort,
-								char * protocol,
-								char * desc,
-								char * enabled,
-								char * rHost,
-								char * duration);
+                                const char * index,
+                                char * extPort,
+                                char * intClient,
+                                char * intPort,
+                                char * protocol,
+                                char * desc,
+                                char * enabled,
+                                char * rHost,
+                                char * duration);
 
 /* UPNP_GetListOfPortMappings()      Available in IGD v2
  *
@@ -301,44 +301,44 @@ UPNP_GetListOfPortMappings(const char * controlURL,
 /* IGD:2, functions for service WANIPv6FirewallControl:1 */
 MINIUPNP_LIBSPEC int
 UPNP_GetFirewallStatus(const char * controlURL,
-				const char * servicetype,
-				int * firewallEnabled,
-				int * inboundPinholeAllowed);
+                       const char * servicetype,
+                       int * firewallEnabled,
+                       int * inboundPinholeAllowed);
 
 MINIUPNP_LIBSPEC int
 UPNP_GetOutboundPinholeTimeout(const char * controlURL, const char * servicetype,
-                    const char * remoteHost,
-                    const char * remotePort,
-                    const char * intClient,
-                    const char * intPort,
-                    const char * proto,
-                    int * opTimeout);
+                               const char * remoteHost,
+                               const char * remotePort,
+                               const char * intClient,
+                               const char * intPort,
+                               const char * proto,
+                               int * opTimeout);
 
 MINIUPNP_LIBSPEC int
 UPNP_AddPinhole(const char * controlURL, const char * servicetype,
-                    const char * remoteHost,
-                    const char * remotePort,
-                    const char * intClient,
-                    const char * intPort,
-                    const char * proto,
-                    const char * leaseTime,
-                    char * uniqueID);
+                const char * remoteHost,
+                const char * remotePort,
+                const char * intClient,
+                const char * intPort,
+                const char * proto,
+                const char * leaseTime,
+                char * uniqueID);
 
 MINIUPNP_LIBSPEC int
 UPNP_UpdatePinhole(const char * controlURL, const char * servicetype,
-                    const char * uniqueID,
-                    const char * leaseTime);
+                   const char * uniqueID,
+                   const char * leaseTime);
 
 MINIUPNP_LIBSPEC int
 UPNP_DeletePinhole(const char * controlURL, const char * servicetype, const char * uniqueID);
 
 MINIUPNP_LIBSPEC int
 UPNP_CheckPinholeWorking(const char * controlURL, const char * servicetype,
-                                 const char * uniqueID, int * isWorking);
+                         const char * uniqueID, int * isWorking);
 
 MINIUPNP_LIBSPEC int
 UPNP_GetPinholePackets(const char * controlURL, const char * servicetype,
-                                 const char * uniqueID, int * packets);
+                       const char * uniqueID, int * packets);
 
 #ifdef __cplusplus
 }
