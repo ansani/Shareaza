@@ -8,10 +8,11 @@
 #
 # Uses MAKE environment variable (defaulting to 'make')
 
-from setuptools import setup, Extension
-from setuptools.command import build_ext
-import subprocess
 import os
+import subprocess
+
+from setuptools import Extension, setup
+from setuptools.command import build_ext
 
 EXT = ["build/libminiupnpc.a"]
 

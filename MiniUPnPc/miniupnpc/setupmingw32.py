@@ -14,9 +14,10 @@ else:
     compat_lib = []
 
 try:
-    from setuptools import setup, Extension
+    from setuptools import Extension, setup
 except ImportError:
     from distutils.core import setup, Extension
+
 from distutils import sysconfig
 
 sysconfig.get_config_vars()["OPT"] = ""

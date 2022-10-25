@@ -6,9 +6,10 @@
 # This Sample code is public domain.
 # website : https://miniupnp.tuxfamily.org/
 
+import sys
+
 # import the python miniupnpc module
 import miniupnpc
-import sys
 
 try:
     import argparse
