@@ -15,10 +15,12 @@ import os
 
 EXT = ['build/libminiupnpc.a']
 
+
 class make_then_build_ext(build_ext.build_ext):
-      def run(self):
-            subprocess.check_call([os.environ.get('MAKE', 'make')] + EXT)
-            build_ext.build_ext.run(self)
+    def run(self):
+        subprocess.check_call([os.environ.get('MAKE', 'make')] + EXT)
+        build_ext.build_ext.run(self)
+
 
 setup(name="miniupnpc",
       version=open('VERSION').read().strip(),
@@ -29,7 +31,6 @@ setup(name="miniupnpc",
       description='miniUPnP client',
       cmdclass={'build_ext': make_then_build_ext},
       ext_modules=[
-         Extension(name="miniupnpc", sources=["src/miniupnpcmodule.c"],
-                   include_dirs=['include'], extra_objects=EXT)
+          Extension(name="miniupnpc", sources=["src/miniupnpcmodule.c"],
+                    include_dirs=['include'], extra_objects=EXT)
       ])
-
