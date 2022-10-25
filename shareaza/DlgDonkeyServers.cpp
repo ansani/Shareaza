@@ -33,26 +33,26 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 BEGIN_MESSAGE_MAP(CDonkeyServersDlg, CSkinDialog)
-	ON_EN_CHANGE(IDC_URL, OnChangeURL)
-	ON_WM_TIMER()
+    ON_EN_CHANGE(IDC_URL, OnChangeURL)
+    ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CDonkeyServersDlg dialog
 
 CDonkeyServersDlg::CDonkeyServersDlg(CWnd* pParent) :
-	CSkinDialog(CDonkeyServersDlg::IDD, pParent)
+    CSkinDialog(CDonkeyServersDlg::IDD, pParent)
 {
 }
 
 void CDonkeyServersDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CSkinDialog::DoDataExchange(pDX);
+    CSkinDialog::DoDataExchange(pDX);
 
-	DDX_Control(pDX, IDC_URL, m_wndURL);
-	DDX_Control(pDX, IDOK, m_wndOK);
-	DDX_Control(pDX, IDC_PROGRESS, m_wndProgress);
-	DDX_Text(pDX, IDC_URL, m_sURL);
+    DDX_Control(pDX, IDC_URL, m_wndURL);
+    DDX_Control(pDX, IDOK, m_wndOK);
+    DDX_Control(pDX, IDC_PROGRESS, m_wndProgress);
+    DDX_Text(pDX, IDC_URL, m_sURL);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -60,93 +60,93 @@ void CDonkeyServersDlg::DoDataExchange(CDataExchange* pDX)
 
 BOOL CDonkeyServersDlg::OnInitDialog()
 {
-	CSkinDialog::OnInitDialog();
+    CSkinDialog::OnInitDialog();
 
-	SkinMe( _T("CDonkeyServersDlg") );
+    SkinMe( _T("CDonkeyServersDlg") );
 
-	m_sURL = Settings.eDonkey.ServerListURL;
+    m_sURL = Settings.eDonkey.ServerListURL;
 
-	m_wndOK.EnableWindow( m_sURL.Find( _T("http://") ) == 0 || m_sURL.Find(_T("https://")) == 0 );
-	m_wndProgress.SetRange( 0, 100 );
-	m_wndProgress.SetPos( 0 );
+    m_wndOK.EnableWindow( m_sURL.Find( _T("http://") ) == 0 || m_sURL.Find(_T("https://")) == 0 );
+    m_wndProgress.SetRange( 0, 100 );
+    m_wndProgress.SetPos( 0 );
 
-	UpdateData( FALSE );
+    UpdateData( FALSE );
 
-	return TRUE;
+    return TRUE;
 }
 
 void CDonkeyServersDlg::OnChangeURL()
 {
-	UpdateData();
+    UpdateData();
 
-	m_wndOK.EnableWindow( m_sURL.Find( _T("http://") ) == 0 || m_sURL.Find(_T("https://")) == 0);
+    m_wndOK.EnableWindow( m_sURL.Find( _T("http://") ) == 0 || m_sURL.Find(_T("https://")) == 0);
 }
 
 void CDonkeyServersDlg::OnOK()
 {
-	UpdateData();
+    UpdateData();
 
-	if ( !(m_sURL.Find( _T("http://")) == 0 || m_sURL.Find(_T("https://")) == 0) )
-		return;
+    if ( !(m_sURL.Find( _T("http://")) == 0 || m_sURL.Find(_T("https://")) == 0) )
+        return;
 
-	if ( ! m_pRequest.SetURL( m_sURL ) )
-		return;
+    if ( ! m_pRequest.SetURL( m_sURL ) )
+        return;
 
-	if ( ! m_pRequest.Execute( true ) )
-		return;
+    if ( ! m_pRequest.Execute( true ) )
+        return;
 
-	Settings.eDonkey.ServerListURL = m_sURL;
+    Settings.eDonkey.ServerListURL = m_sURL;
 
-	m_wndOK.EnableWindow( FALSE );
-	m_wndURL.EnableWindow( FALSE );
+    m_wndOK.EnableWindow( FALSE );
+    m_wndURL.EnableWindow( FALSE );
 
-	SetTimer( 1, 250, NULL );
+    SetTimer( 1, 250, NULL );
 }
 
 void CDonkeyServersDlg::OnCancel()
 {
-	KillTimer( 1 );
+    KillTimer( 1 );
 
-	m_pRequest.Cancel();
+    m_pRequest.Cancel();
 
-	CSkinDialog::OnCancel();
+    CSkinDialog::OnCancel();
 }
 
 void CDonkeyServersDlg::OnTimer(UINT_PTR nIDEvent)
 {
-	CSkinDialog::OnTimer( nIDEvent );
+    CSkinDialog::OnTimer( nIDEvent );
 
-	if ( m_pRequest.IsPending() )
-	{
-		int n = m_wndProgress.GetPos();
-		if ( ++n >= 100 )
-			n = 0;
-		m_wndProgress.SetPos( n );
-	}
-	else
-	{
-		KillTimer( 1 );
+    if ( m_pRequest.IsPending() )
+    {
+        int n = m_wndProgress.GetPos();
+        if ( ++n >= 100 )
+            n = 0;
+        m_wndProgress.SetPos( n );
+    }
+    else
+    {
+        KillTimer( 1 );
 
-		if ( m_pRequest.GetStatusSuccess() )
-		{
-			const CBuffer* pBuffer = m_pRequest.GetResponseBuffer();
+        if ( m_pRequest.GetStatusSuccess() )
+        {
+            const CBuffer* pBuffer = m_pRequest.GetResponseBuffer();
 
-			CMemFile pFile;
-			pFile.Write( pBuffer->m_pBuffer, pBuffer->m_nLength );
-			pFile.Seek( 0, CFile::begin );
+            CMemFile pFile;
+            pFile.Write( pBuffer->m_pBuffer, pBuffer->m_nLength );
+            pFile.Seek( 0, CFile::begin );
 
-			if ( HostCache.ImportMET( &pFile ) )
-				HostCache.Save();
-		}
-		else
-		{
-			CString strError;
-			strError.Format( LoadString( IDS_DOWNLOAD_DROPPED ), (LPCTSTR)m_sURL );
-			AfxMessageBox( strError, MB_OK | MB_ICONEXCLAMATION );
-		}
+            if ( HostCache.ImportMET( &pFile ) )
+                HostCache.Save();
+        }
+        else
+        {
+            CString strError;
+            strError.Format( LoadString( IDS_DOWNLOAD_DROPPED ), (LPCTSTR)m_sURL );
+            AfxMessageBox( strError, MB_OK | MB_ICONEXCLAMATION );
+        }
 
-		EndDialog( IDOK );
-	}
+        EndDialog( IDOK );
+    }
 
-	UpdateWindow();
+    UpdateWindow();
 }
