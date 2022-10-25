@@ -24,15 +24,15 @@ fi
 if [ -z "$TESTMINIWGET" ] ; then
   TESTMINIWGET=./build/testminiwget
 fi
-HTTPSERVEROUT="${TMPD}/httpserverout"
-EXPECTEDFILE="${TMPD}/expectedfile"
-DOWNLOADEDFILE="${TMPD}/downloadedfile"
+HTTPSERVEROUT="$TMPD/httpserverout"
+EXPECTEDFILE="$TMPD/expectedfile"
+DOWNLOADEDFILE="$TMPD/downloadedfile"
 PORT=
 RET=0
 IPCONFIG=$(which ifconfig)
 IP=$(which ip)
 if [ "$IP" ] ; then
-	if ! $IP addr | grep inet6 ; then
+	if ! "$IP" addr | grep inet6 ; then
 		HAVE_IPV6=no
 	fi
 else
@@ -40,7 +40,7 @@ else
 		IPCONFIG="/sbin/ifconfig"
 	fi
 
-	if ! $IPCONFIG -a | grep inet6 ; then
+	if ! "$IPCONFIG" -a | grep inet6 ; then
 		HAVE_IPV6=no
 	fi
 fi
@@ -65,16 +65,16 @@ if [ ! -x "$TESTSERVER" ] || [ ! -x "$TESTMINIWGET" ] ; then
 fi
 
 # launching the test HTTP server
-$TESTSERVER $SERVERARGS -e $EXPECTEDFILE > $HTTPSERVEROUT &
+"$TESTSERVER" "$SERVERARGS" -e "$EXPECTEDFILE" > "$HTTPSERVEROUT" &
 SERVERPID=$!
 while [ -z "$PORT" ]; do
 	sleep 1
-	PORT=`cat $HTTPSERVEROUT | sed 's/Listening on port \([0-9]*\)/\1/' `
+	PORT=`cat "$HTTPSERVEROUT" | sed 's/Listening on port \([0-9]*\)/\1/' `
 done
 if [ "$PORT" = "*** ERROR ***" ]; then
 	echo "HTTP test server error"
 	echo "Network config :"
-	$IPCONFIG -a
+	"$IPCONFIG" -a
 	exit 2
 fi
 echo "Test HTTP server is listening on $PORT"
@@ -85,8 +85,8 @@ URL3="http://$ADDR:$PORT/addcrap"
 URL4="http://$ADDR:$PORT/malformed"
 
 echo "standard test ..."
-$TESTMINIWGET $URL1 "${DOWNLOADEDFILE}.1"
-if cmp $EXPECTEDFILE "${DOWNLOADEDFILE}.1" ; then
+"$TESTMINIWGET" "$URL1" "$DOWNLOADEDFILE.1"
+if cmp "$EXPECTEDFILE" "$DOWNLOADEDFILE.1" ; then
 	echo "ok"
 else
 	echo "standard test FAILED"
@@ -94,8 +94,8 @@ else
 fi
 
 echo "chunked transfert encoding test ..."
-$TESTMINIWGET $URL2 "${DOWNLOADEDFILE}.2"
-if cmp $EXPECTEDFILE "${DOWNLOADEDFILE}.2" ; then
+"$TESTMINIWGET" "$URL2" "$DOWNLOADEDFILE.2"
+if cmp "$EXPECTEDFILE" "$DOWNLOADEDFILE.2" ; then
 	echo "ok"
 else
 	echo "chunked transfert encoding test FAILED"
@@ -103,8 +103,8 @@ else
 fi
 
 echo "response too long test ..."
-$TESTMINIWGET $URL3 "${DOWNLOADEDFILE}.3"
-if cmp $EXPECTEDFILE "${DOWNLOADEDFILE}.3" ; then
+"$TESTMINIWGET" "$URL3" "$DOWNLOADEDFILE.3"
+if cmp "$EXPECTEDFILE" "$DOWNLOADEDFILE.3" ; then
 	echo "ok"
 else
 	echo "response too long test FAILED"
@@ -112,22 +112,22 @@ else
 fi
 
 echo "malformed response test ..."
-$TESTMINIWGET $URL4 "${DOWNLOADEDFILE}.4"
+"$TESTMINIWGET" "$URL4" "$DOWNLOADEDFILE.4"
 
 # kill the test HTTP server
-kill $SERVERPID
-wait $SERVERPID
+kill "$SERVERPID"
+wait "$SERVERPID"
 
 # remove temporary files (for success cases)
-if [ $RET -eq 0 ]; then
-	rm -f "${DOWNLOADEDFILE}.1"
-	rm -f "${DOWNLOADEDFILE}.2"
-	rm -f "${DOWNLOADEDFILE}.3"
-	rm -f $EXPECTEDFILE $HTTPSERVEROUT
-	rmdir ${TMPD}
+if [ "$RET" -eq 0 ]; then
+	rm -f "$DOWNLOADEDFILE.1"
+	rm -f "$DOWNLOADEDFILE.2"
+	rm -f "$DOWNLOADEDFILE.3"
+	rm -f "$EXPECTEDFILE" "$HTTPSERVEROUT"
+	rmdir "$TMPD"
 else
 	echo "at least one of the test FAILED"
-	echo "directory ${TMPD} is left intact"
+	echo "directory $TMPD is left intact"
 fi
-exit $RET
+exit "$RET"
 
