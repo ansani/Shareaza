@@ -22,30 +22,27 @@
 // This scipt compares current directory revision and revision saved in
 // revision.h file using TortoiseSVN COM-interface.
 
-// #TODO: Fix the revision 
+// #TODO: Fix the revision
 
-var fso = WScript.CreateObject( "Scripting.FileSystemObject" );
-var fpath = fso.GetAbsolutePathName( "." )
-var fname = fso.GetAbsolutePathName( "revision.h" );
+var fso = WScript.CreateObject("Scripting.FileSystemObject");
+var fpath = fso.GetAbsolutePathName(".")
+var fname = fso.GetAbsolutePathName("revision.h");
 
 var date = Date.now;
 var revision = "TODO:FIX"
 
-try
-{
-	var tsw = fso.OpenTextFile( fname, 2, true );
-	tsw.WriteLine( "// rev." + revision );
-	tsw.WriteLine( "" );
-	tsw.WriteLine( "#pragma once" );
-	tsw.WriteLine( "" );
-	tsw.WriteLine( "#define __REVISION__\t\t\"" + revision + "\"" );
-	tsw.WriteLine( "#define __REVISION_DATE__\t\"" + date + "\"" );
-	tsw.Close();
-}
-catch(e)
-{
-	WScript.Echo( "Update failed: \"" + fname + "\"" );
-	WScript.Quit( 1 );
+try {
+  var tsw = fso.OpenTextFile(fname, 2, true);
+  tsw.WriteLine("// rev." + revision);
+  tsw.WriteLine("");
+  tsw.WriteLine("#pragma once");
+  tsw.WriteLine("");
+  tsw.WriteLine("#define __REVISION__\t\t\"" + revision + "\"");
+  tsw.WriteLine("#define __REVISION_DATE__\t\"" + date + "\"");
+  tsw.Close();
+} catch (e) {
+  WScript.Echo("Update failed: \"" + fname + "\"");
+  WScript.Quit(1);
 }
 
-WScript.Quit( 0 );
+WScript.Quit(0);
