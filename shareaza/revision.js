@@ -25,11 +25,11 @@
 // #TODO: Fix the revision
 
 var fso = WScript.CreateObject("Scripting.FileSystemObject");
-var fpath = fso.GetAbsolutePathName(".")
+var fpath = fso.GetAbsolutePathName(".");
 var fname = fso.GetAbsolutePathName("revision.h");
 
 var date = Date.now;
-var revision = "TODO:FIX"
+var revision = "TODO:FIX";
 
 try {
   var tsw = fso.OpenTextFile(fname, 2, true);
@@ -37,11 +37,11 @@ try {
   tsw.WriteLine("");
   tsw.WriteLine("#pragma once");
   tsw.WriteLine("");
-  tsw.WriteLine("#define __REVISION__\t\t\"" + revision + "\"");
-  tsw.WriteLine("#define __REVISION_DATE__\t\"" + date + "\"");
+  tsw.WriteLine('#define __REVISION__\t\t"' + revision + '"');
+  tsw.WriteLine('#define __REVISION_DATE__\t"' + date + '"');
   tsw.Close();
 } catch (e) {
-  WScript.Echo("Update failed: \"" + fname + "\"");
+  WScript.Echo('Update failed: "' + fname + '"');
   WScript.Quit(1);
 }
 
