@@ -36,10 +36,10 @@ class CSplashDlg;
 class __declspec(novtable) CLogMessage
 {
 public:
-	CLogMessage(WORD nType, const CString& strLog) : m_strLog( strLog ), m_nType( nType ), m_Time( CTime::GetCurrentTime() ) {}
-	CString m_strLog;
-	WORD	m_nType;
-	CTime	m_Time;
+    CLogMessage(WORD nType, const CString& strLog) : m_strLog( strLog ), m_nType( nType ), m_Time( CTime::GetCurrentTime() ) {}
+    CString m_strLog;
+    WORD	m_nType;
+    CTime	m_Time;
 };
 
 typedef CList< CLogMessage* > CLogMessageList;
@@ -48,199 +48,199 @@ typedef CList< CLogMessage* > CLogMessageList;
 class CShareazaCommandLineInfo : public CCommandLineInfo
 {
 public:
-	CShareazaCommandLineInfo();
+    CShareazaCommandLineInfo();
 
-	virtual void ParseParam(const TCHAR* pszParam, BOOL bFlag, BOOL bLast);
+    virtual void ParseParam(const TCHAR* pszParam, BOOL bFlag, BOOL bLast);
 
-	BOOL	m_bTray;
-	BOOL	m_bNoSplash;
-	BOOL	m_bNoAlphaWarning;
-	INT		m_nGUIMode;
-	BOOL	m_bHelp;
-	CString	m_sTask;
-	BOOL	m_bWait;
+    BOOL	m_bTray;
+    BOOL	m_bNoSplash;
+    BOOL	m_bNoAlphaWarning;
+    INT		m_nGUIMode;
+    BOOL	m_bHelp;
+    CString	m_sTask;
+    BOOL	m_bWait;
 
 private:
-	CShareazaCommandLineInfo(const CShareazaCommandLineInfo&);
-	CShareazaCommandLineInfo& operator=(const CShareazaCommandLineInfo&);
+    CShareazaCommandLineInfo(const CShareazaCommandLineInfo&);
+    CShareazaCommandLineInfo& operator=(const CShareazaCommandLineInfo&);
 };
 
 
 class CShareazaApp : public CWinApp
 {
-	DECLARE_DYNAMIC(CShareazaApp)
+    DECLARE_DYNAMIC(CShareazaApp)
 
 public:
-	CShareazaApp();
-	virtual ~CShareazaApp();
+    CShareazaApp();
+    virtual ~CShareazaApp();
 
-	HANDLE				m_pMutex;
-	CMutex				m_pSection;
-	WORD				m_nVersion[4];
-	BYTE				m_pBTVersion[4];			// SZxx
-	CString				m_sVersion;					// x.x.x.x
-	CString				m_sVersionLong;				// x.x.x.x Release/Debug 32-bit/64-bit (rXXXX date)
-	CString				m_sSmartAgent;				// Shareaza x.x.x.x
-	CString				m_sBuildDate;
-	CString				m_strBinaryPath;			// Shareaza.exe path
-	BYTE				m_nFontQuality;
-	CFont				m_gdiFont;
-	CFont				m_gdiFontBold;
-	CFont				m_gdiFontLine;
-	CWnd*				m_pSafeWnd;
-	volatile LONG		m_bBusy;					// Shareaza is busy
-	volatile bool		m_bInteractive;				// Shareaza begins initialization
-	volatile bool		m_bLive;					// Shareaza fully initialized
-	volatile bool		m_bClosing;					// Shareaza begins closing
-	bool				m_bIsServer;				// Is OS a Server version
-	bool				m_bIsWin2000;				// Is OS Windows 2000
-	bool				m_bIsVistaOrNewer;			// Is OS Vista or newer
-	bool				m_bIs7OrNewer;				// Is OS 7 or newer
-	bool				m_bLimitedConnections;		// Networking is limited (XP SP2)
-	BOOL				m_bMenuWasVisible;			// For the menus in media player window
-	DWORD				m_nLastInput;				// Time of last input event (in secs)
-	HHOOK				m_hHookKbd;
-	HHOOK				m_hHookMouse;
-	CPacketWnd*			m_pPacketWnd;				// Packet Window (NULL - not opened)
-	CShareazaCommandLineInfo m_cmdInfo;				// Command-line options
+    HANDLE				m_pMutex;
+    CMutex				m_pSection;
+    WORD				m_nVersion[4];
+    BYTE				m_pBTVersion[4];			// SZxx
+    CString				m_sVersion;					// x.x.x.x
+    CString				m_sVersionLong;				// x.x.x.x Release/Debug 32-bit/64-bit (rXXXX date)
+    CString				m_sSmartAgent;				// Shareaza x.x.x.x
+    CString				m_sBuildDate;
+    CString				m_strBinaryPath;			// Shareaza.exe path
+    BYTE				m_nFontQuality;
+    CFont				m_gdiFont;
+    CFont				m_gdiFontBold;
+    CFont				m_gdiFontLine;
+    CWnd*				m_pSafeWnd;
+    volatile LONG		m_bBusy;					// Shareaza is busy
+    volatile bool		m_bInteractive;				// Shareaza begins initialization
+    volatile bool		m_bLive;					// Shareaza fully initialized
+    volatile bool		m_bClosing;					// Shareaza begins closing
+    bool				m_bIsServer;				// Is OS a Server version
+    bool				m_bIsWin2000;				// Is OS Windows 2000
+    bool				m_bIsVistaOrNewer;			// Is OS Vista or newer
+    bool				m_bIs7OrNewer;				// Is OS 7 or newer
+    bool				m_bLimitedConnections;		// Networking is limited (XP SP2)
+    BOOL				m_bMenuWasVisible;			// For the menus in media player window
+    DWORD				m_nLastInput;				// Time of last input event (in secs)
+    HHOOK				m_hHookKbd;
+    HHOOK				m_hHookMouse;
+    CPacketWnd*			m_pPacketWnd;				// Packet Window (NULL - not opened)
+    CShareazaCommandLineInfo m_cmdInfo;				// Command-line options
 
-	// Cryptography Context handle
-	HCRYPTPROV			m_hCryptProv;
+    // Cryptography Context handle
+    HCRYPTPROV			m_hCryptProv;
 
-	// Kernel functions
-	HRESULT		(WINAPI *m_pRegisterApplicationRestart)( __in_opt PCWSTR pwzCommandline, __in DWORD dwFlags );
+    // Kernel functions
+    HRESULT		(WINAPI *m_pRegisterApplicationRestart)( __in_opt PCWSTR pwzCommandline, __in DWORD dwFlags );
 
-	// For themes functions
-	HINSTANCE			m_hTheme;
-	HRESULT		(WINAPI *m_pfnSetWindowTheme)(HWND, LPCWSTR, LPCWSTR);
-	BOOL		(WINAPI *m_pfnIsThemeActive)(VOID);
-	HANDLE		(WINAPI *m_pfnOpenThemeData)(HWND, LPCWSTR);
-	HRESULT		(WINAPI *m_pfnCloseThemeData)(HANDLE);
-	HRESULT		(WINAPI *m_pfnDrawThemeBackground)(HANDLE, HDC, int, int, const RECT*, const RECT*);
-	HRESULT		(WINAPI *m_pfnGetThemeSysFont)(HTHEME, int, __out LOGFONTW* );
+    // For themes functions
+    HINSTANCE			m_hTheme;
+    HRESULT		(WINAPI *m_pfnSetWindowTheme)(HWND, LPCWSTR, LPCWSTR);
+    BOOL		(WINAPI *m_pfnIsThemeActive)(VOID);
+    HANDLE		(WINAPI *m_pfnOpenThemeData)(HWND, LPCWSTR);
+    HRESULT		(WINAPI *m_pfnCloseThemeData)(HANDLE);
+    HRESULT		(WINAPI *m_pfnDrawThemeBackground)(HANDLE, HDC, int, int, const RECT*, const RECT*);
+    HRESULT		(WINAPI *m_pfnGetThemeSysFont)(HTHEME, int, __out LOGFONTW* );
 
-	// Shell functions
-	HINSTANCE			m_hShlWapi;
-	BOOL		(WINAPI *m_pfnAssocIsDangerous)(LPCWSTR);
+    // Shell functions
+    HINSTANCE			m_hShlWapi;
+    BOOL		(WINAPI *m_pfnAssocIsDangerous)(LPCWSTR);
 
-	HINSTANCE			m_hShell32;
-	HRESULT		(WINAPI *m_pfnSHGetFolderPathW)(__reserved HWND hwnd, __in int csidl, __in_opt HANDLE hToken, __in DWORD dwFlags, __out_ecount(MAX_PATH) LPWSTR pszPath);
-	HRESULT		(WINAPI *m_pfnSHGetKnownFolderPath)(__in REFKNOWNFOLDERID rfid, __in DWORD /* KNOWN_FOLDER_FLAG */ dwFlags, __in_opt HANDLE hToken, __deref_out PWSTR *ppszPath);
-	HRESULT		(WINAPI *m_pfnSHCreateItemFromParsingName)(__in PCWSTR pszPath, __in_opt IBindCtx *pbc, __in REFIID riid, __deref_out void **ppv);
-	HRESULT		(WINAPI *m_pfnSHGetPropertyStoreFromParsingName)(__in PCWSTR pszPath, __in_opt IBindCtx *pbc, __in GETPROPERTYSTOREFLAGS flags, __in REFIID riid, __deref_out void **ppv);
-	HRESULT		(WINAPI *m_pfnSetCurrentProcessExplicitAppUserModelID)(__in PCWSTR pszAppID);
-	HRESULT		(WINAPI *m_pfnSHGetImageList)(__in int iImageList, __in REFIID riid, __out void **ppv);
+    HINSTANCE			m_hShell32;
+    HRESULT		(WINAPI *m_pfnSHGetFolderPathW)(__reserved HWND hwnd, __in int csidl, __in_opt HANDLE hToken, __in DWORD dwFlags, __out_ecount(MAX_PATH) LPWSTR pszPath);
+    HRESULT		(WINAPI *m_pfnSHGetKnownFolderPath)(__in REFKNOWNFOLDERID rfid, __in DWORD /* KNOWN_FOLDER_FLAG */ dwFlags, __in_opt HANDLE hToken, __deref_out PWSTR *ppszPath);
+    HRESULT		(WINAPI *m_pfnSHCreateItemFromParsingName)(__in PCWSTR pszPath, __in_opt IBindCtx *pbc, __in REFIID riid, __deref_out void **ppv);
+    HRESULT		(WINAPI *m_pfnSHGetPropertyStoreFromParsingName)(__in PCWSTR pszPath, __in_opt IBindCtx *pbc, __in GETPROPERTYSTOREFLAGS flags, __in REFIID riid, __deref_out void **ppv);
+    HRESULT		(WINAPI *m_pfnSetCurrentProcessExplicitAppUserModelID)(__in PCWSTR pszAppID);
+    HRESULT		(WINAPI *m_pfnSHGetImageList)(__in int iImageList, __in REFIID riid, __out void **ppv);
 
-	HINSTANCE			m_hUser32;
-	BOOL		(WINAPI *m_pfnChangeWindowMessageFilter)(UINT message, DWORD dwFlag);
-	BOOL		(WINAPI *m_pfnShutdownBlockReasonCreate)(_In_ HWND hWnd, _In_ LPCWSTR pwszReason);
-	BOOL		(WINAPI *m_pfnShutdownBlockReasonDestroy)(_In_ HWND hWnd);
+    HINSTANCE			m_hUser32;
+    BOOL		(WINAPI *m_pfnChangeWindowMessageFilter)(UINT message, DWORD dwFlag);
+    BOOL		(WINAPI *m_pfnShutdownBlockReasonCreate)(_In_ HWND hWnd, _In_ LPCWSTR pwszReason);
+    BOOL		(WINAPI *m_pfnShutdownBlockReasonDestroy)(_In_ HWND hWnd);
 
-	BOOL GetPropertyStoreFromParsingName( LPCWSTR pszPath, IPropertyStore**ppv );
+    BOOL GetPropertyStoreFromParsingName( LPCWSTR pszPath, IPropertyStore**ppv );
 
-	// GeoIP - IP to Country lookup
-	HINSTANCE			m_hGeoIP;
-	GeoIP*				m_pGeoIP;
-	typedef GeoIP* (*GeoIP_newFunc)(int);
-	typedef int (*GeoIP_cleanupFunc)(void);
-	typedef void (*GeoIP_deleteFunc)(GeoIP* gi);
-	typedef const char * (*GeoIP_country_code_by_ipnumFunc) (GeoIP* gi, unsigned long ipnum);
-	typedef const char * (*GeoIP_country_name_by_ipnumFunc) (GeoIP* gi, unsigned long ipnum);
-	typedef const char * (*GeoIP_country_code_by_ipnumFunc_v6) (GeoIP* gi, geoipv6_t ipnum);
-	typedef const char * (*GeoIP_country_name_by_ipnumFunc_v6) (GeoIP* gi, geoipv6_t ipnum);
-	GeoIP_cleanupFunc				m_pfnGeoIP_cleanup;
-	GeoIP_deleteFunc				m_pfnGeoIP_delete;
-	GeoIP_country_code_by_ipnumFunc	m_pfnGeoIP_country_code_by_ipnum;
-	GeoIP_country_name_by_ipnumFunc	m_pfnGeoIP_country_name_by_ipnum;
-	GeoIP_country_code_by_ipnumFunc_v6	m_pfnGeoIP_country_code_by_ipnum_v6;
-	GeoIP_country_name_by_ipnumFunc_v6	m_pfnGeoIP_country_name_by_ipnum_v6;
+    // GeoIP - IP to Country lookup
+    HINSTANCE			m_hGeoIP;
+    GeoIP*				m_pGeoIP;
+    typedef GeoIP* (*GeoIP_newFunc)(int);
+    typedef int (*GeoIP_cleanupFunc)(void);
+    typedef void (*GeoIP_deleteFunc)(GeoIP* gi);
+    typedef const char * (*GeoIP_country_code_by_ipnumFunc) (GeoIP* gi, unsigned long ipnum);
+    typedef const char * (*GeoIP_country_name_by_ipnumFunc) (GeoIP* gi, unsigned long ipnum);
+    typedef const char * (*GeoIP_country_code_by_ipnumFunc_v6) (GeoIP* gi, geoipv6_t ipnum);
+    typedef const char * (*GeoIP_country_name_by_ipnumFunc_v6) (GeoIP* gi, geoipv6_t ipnum);
+    GeoIP_cleanupFunc				m_pfnGeoIP_cleanup;
+    GeoIP_deleteFunc				m_pfnGeoIP_delete;
+    GeoIP_country_code_by_ipnumFunc	m_pfnGeoIP_country_code_by_ipnum;
+    GeoIP_country_name_by_ipnumFunc	m_pfnGeoIP_country_name_by_ipnum;
+    GeoIP_country_code_by_ipnumFunc_v6	m_pfnGeoIP_country_code_by_ipnum_v6;
+    GeoIP_country_name_by_ipnumFunc_v6	m_pfnGeoIP_country_name_by_ipnum_v6;
 
-	HINSTANCE			m_hLibGFL;
+    HINSTANCE			m_hLibGFL;
 
-	HINSTANCE			CustomLoadLibrary(LPCTSTR);
-	CMainWnd*			SafeMainWnd() const;
-	BOOL				InternalURI(LPCTSTR pszURI);
+    HINSTANCE			CustomLoadLibrary(LPCTSTR);
+    CMainWnd*			SafeMainWnd() const;
+    BOOL				InternalURI(LPCTSTR pszURI);
 
-	// Logging functions
-	CLogMessageList		m_oMessages;	// Log temporary storage
-	CCriticalSection	m_csMessage;	// m_oMessages guard
-	bool				IsLogDisabled(WORD nType) const;
-	void				ShowStartupText();
-	void				Message(WORD nType, UINT nID, ...);
-	void				Message(WORD nType, LPCTSTR pszFormat, ...);
-	// Log to file and to system window
-	void				PrintMessage(WORD nType, const CString& strLog);
+    // Logging functions
+    CLogMessageList		m_oMessages;	// Log temporary storage
+    CCriticalSection	m_csMessage;	// m_oMessages guard
+    bool				IsLogDisabled(WORD nType) const;
+    void				ShowStartupText();
+    void				Message(WORD nType, UINT nID, ...);
+    void				Message(WORD nType, LPCTSTR pszFormat, ...);
+    // Log to file and to system window
+    void				PrintMessage(WORD nType, const CString& strLog);
 
-	void				SplashStep(LPCTSTR pszMessage = NULL, int nMax = 0, bool bClosing = false);
-	void				SplashAbort();
+    void				SplashStep(LPCTSTR pszMessage = NULL, int nMax = 0, bool bClosing = false);
+    void				SplashAbort();
 
-	CString				GetCountryCode(IN_ADDR pAddress) const;
-	CString				GetCountryName(IN_ADDR pAddress) const;
-	CString				GetCountryCode(IN6_ADDR pAddress) const;
-	CString				GetCountryName(IN6_ADDR pAddress) const;
+    CString				GetCountryCode(IN_ADDR pAddress) const;
+    CString				GetCountryName(IN_ADDR pAddress) const;
+    CString				GetCountryCode(IN6_ADDR pAddress) const;
+    CString				GetCountryName(IN6_ADDR pAddress) const;
 
-	// Open file or url. Returns NULL always.
-	virtual CDocument*	OpenDocumentFile(LPCTSTR lpszFileName);
-	// Open file or url (generic function)
-	BOOL				Open(LPCTSTR lpszFileName, BOOL bDoIt, BOOL bDispay = FALSE);
-	// Show file in Library
-	BOOL				DisplayFile(LPCTSTR lpszFileName, BOOL bDoIt);
-	// Open host list file
-	BOOL				OpenImport(LPCTSTR lpszFileName, BOOL bDoIt);
-	// Open .lnk file
-	BOOL				OpenShellShortcut(LPCTSTR lpszFileName, BOOL bDoIt);
-	// Open .url file
-	BOOL				OpenInternetShortcut(LPCTSTR lpszFileName, BOOL bDoIt);
-	// Open .torrent file
-	BOOL				OpenTorrent(LPCTSTR lpszFileName, BOOL bDoIt);
-	// Open Shareaza, eMule or DC++ collection file
-	BOOL				OpenCollection(LPCTSTR lpszFileName, BOOL bDoIt);
-	// Open URL
-	BOOL				OpenURL(LPCTSTR lpszFileName, BOOL bDoIt, BOOL bSilent = FALSE);
-	// Open Shareaza Download file
-	BOOL				OpenDownload(LPCTSTR lpszFileName, BOOL bDoIt);
+    // Open file or url. Returns NULL always.
+    virtual CDocument*	OpenDocumentFile(LPCTSTR lpszFileName);
+    // Open file or url (generic function)
+    BOOL				Open(LPCTSTR lpszFileName, BOOL bDoIt, BOOL bDispay = FALSE);
+    // Show file in Library
+    BOOL				DisplayFile(LPCTSTR lpszFileName, BOOL bDoIt);
+    // Open host list file
+    BOOL				OpenImport(LPCTSTR lpszFileName, BOOL bDoIt);
+    // Open .lnk file
+    BOOL				OpenShellShortcut(LPCTSTR lpszFileName, BOOL bDoIt);
+    // Open .url file
+    BOOL				OpenInternetShortcut(LPCTSTR lpszFileName, BOOL bDoIt);
+    // Open .torrent file
+    BOOL				OpenTorrent(LPCTSTR lpszFileName, BOOL bDoIt);
+    // Open Shareaza, eMule or DC++ collection file
+    BOOL				OpenCollection(LPCTSTR lpszFileName, BOOL bDoIt);
+    // Open URL
+    BOOL				OpenURL(LPCTSTR lpszFileName, BOOL bDoIt, BOOL bSilent = FALSE);
+    // Open Shareaza Download file
+    BOOL				OpenDownload(LPCTSTR lpszFileName, BOOL bDoIt);
 
-	CString				GetWindowsFolder() const;
-	CString				GetProgramFilesFolder64() const;
-	CString				GetProgramFilesFolder() const;
-	CString				GetDocumentsFolder() const;
-	CString				GetDownloadsFolder() const;
-	CString				GetAppDataFolder() const;
-	CString				GetLocalAppDataFolder() const;
+    CString				GetWindowsFolder() const;
+    CString				GetProgramFilesFolder64() const;
+    CString				GetProgramFilesFolder() const;
+    CString				GetDocumentsFolder() const;
+    CString				GetDownloadsFolder() const;
+    CString				GetAppDataFolder() const;
+    CString				GetLocalAppDataFolder() const;
 
-	// Rename, delete or release file.
-	// pszTarget == 0 - delete file; pszTarget == 1 - release file.
-	void				OnRename(LPCTSTR strSource, LPCTSTR pszTarget = (LPCTSTR)1);
+    // Rename, delete or release file.
+    // pszTarget == 0 - delete file; pszTarget == 1 - release file.
+    void				OnRename(LPCTSTR strSource, LPCTSTR pszTarget = (LPCTSTR)1);
 
-	// Get database handler
-	// Must be freed by "delete" operator.
-	CDatabase*			GetDatabase() const;
+    // Get database handler
+    // Must be freed by "delete" operator.
+    CDatabase*			GetDatabase() const;
 
-	// Copy text to clipboard (Unicode)
-	BOOL SetClipboardText(const CString& strText);
+    // Copy text to clipboard (Unicode)
+    BOOL SetClipboardText(const CString& strText);
 
 protected:
-	CSplashDlg*			m_dlgSplash;		// Splash dialog
+    CSplashDlg*			m_dlgSplash;		// Splash dialog
 
-	virtual BOOL		InitInstance();
-	virtual int			ExitInstance();
-	virtual void		WinHelp(DWORD_PTR dwData, UINT nCmd = HELP_CONTEXT);
-	virtual BOOL		Register();
-	virtual BOOL		Unregister();
-	virtual void		AddToRecentFileList(LPCTSTR lpszPathName);
+    virtual BOOL		InitInstance();
+    virtual int			ExitInstance();
+    virtual void		WinHelp(DWORD_PTR dwData, UINT nCmd = HELP_CONTEXT);
+    virtual BOOL		Register();
+    virtual BOOL		Unregister();
+    virtual void		AddToRecentFileList(LPCTSTR lpszPathName);
 
-	void				InitResources();	// Initialize Shareaza version, system info, load DLLs, etc.
-	void				InitFonts();		// Create default fonts
-	BOOL				ParseCommandLine();	// Parse and execute command-line
+    void				InitResources();	// Initialize Shareaza version, system info, load DLLs, etc.
+    void				InitFonts();		// Create default fonts
+    BOOL				ParseCommandLine();	// Parse and execute command-line
 
-	void				LoadCountry();		// Load the GeoIP library for mapping IPs to countries
-	void				FreeCountry();		// Free GeoIP resources
+    void				LoadCountry();		// Load the GeoIP library for mapping IPs to countries
+    void				FreeCountry();		// Free GeoIP resources
 
-	DECLARE_MESSAGE_MAP()
+    DECLARE_MESSAGE_MAP()
 
 private:
-	CShareazaApp(const CShareazaApp&);
-	CShareazaApp& operator=(const CShareazaApp&);
+    CShareazaApp(const CShareazaApp&);
+    CShareazaApp& operator=(const CShareazaApp&);
 };
 
 extern CShareazaApp			theApp;						// Shareaza Application
@@ -250,10 +250,10 @@ extern SYSTEM_INFO			System;						// System Information
 class CProgressDialog : public CComPtr< IProgressDialog >
 {
 public:
-	CProgressDialog(LPCTSTR szTitle, DWORD dwFlags = PROGDLG_NOCANCEL | PROGDLG_AUTOTIME);
-	virtual ~CProgressDialog();
+    CProgressDialog(LPCTSTR szTitle, DWORD dwFlags = PROGDLG_NOCANCEL | PROGDLG_AUTOTIME);
+    virtual ~CProgressDialog();
 
-	void Progress(LPCTSTR szText, QWORD nCompleted = 0, QWORD nTotal = 0);
+    void Progress(LPCTSTR szText, QWORD nCompleted = 0, QWORD nTotal = 0);
 };
 
 //
@@ -358,25 +358,25 @@ void AddAndSelect(CComboBox& wndBox, const CString& sText);
 
 struct CompareNums
 {
-	bool operator()(WORD lhs, WORD rhs) const
-	{
-		return lhs > rhs;
-	}
+    bool operator()(WORD lhs, WORD rhs) const
+    {
+        return lhs > rhs;
+    }
 };
 
 // Use with whole numbers only
 template <typename T>
 inline T GetRandomNum(const T& min, const T& max)
 {
-	if ( theApp.m_hCryptProv != 0 )
-	{
-		T nRandom = 0;
-		if ( CryptGenRandom( theApp.m_hCryptProv, sizeof( T ), (BYTE*)&nRandom ) )
-			return static_cast< T >( (double)nRandom  * ( (double)max - (double)min + 1 ) / ( (double)static_cast< T >( -1 ) + 1 ) + min );
-	}
+    if ( theApp.m_hCryptProv != 0 )
+    {
+        T nRandom = 0;
+        if ( CryptGenRandom( theApp.m_hCryptProv, sizeof( T ), (BYTE*)&nRandom ) )
+            return static_cast< T >( (double)nRandom  * ( (double)max - (double)min + 1 ) / ( (double)static_cast< T >( -1 ) + 1 ) + min );
+    }
 
-	// Fallback to non-secure method
-	return static_cast< T >( (double)rand() * ( max - min + 1 ) / ( (double)RAND_MAX + 1 ) + min );
+    // Fallback to non-secure method
+    return static_cast< T >( (double)rand() * ( max - min + 1 ) / ( (double)RAND_MAX + 1 ) + min );
 }
 
 template <>
