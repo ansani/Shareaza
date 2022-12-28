@@ -4,13 +4,13 @@
 #define STRINGIZE(x) STRINGIZE2(x)
 
 #ifndef RevisionSHA
-#define __REVISION__		"BUILT MANUALLY"
+#define __REVISION__ "BUILT MANUALLY"
 #else
-#define __REVISION__		RevisionSHA
+#define __REVISION__ RevisionSHA
 #endif
 
 #ifndef RevisionDate
-#define __REVISION_DATE__	"NOT AVAILABLE"
+#define __REVISION_DATE__ "NOT AVAILABLE"
 #else
-#define __REVISION_DATE__	RevisionDate
+#define __REVISION_DATE__ RevisionDate
 #endif
