@@ -664,6 +664,21 @@ DWORD CFragmentedFile::Move(DWORD nIndex, LPCTSTR pszDestination, LPPROGRESS_ROU
 						strTarget.Format( _T("%s\\%s_%u"), pszDestination, sName, index );
 				}
 
+			// Check if the target file exists
+			// Try to get the file attributes
+			WIN32_FILE_ATTRIBUTE_DATA fileAttr;
+			if (GetFileAttributesEx(strTarget, GetFileExInfoStandard, &fileAttr))
+			{
+				// The file exists
+				CString fileExtension = strTarget.Right(strTarget.GetLength() - strTarget.ReverseFind(_T('.')));
+				CString fileName = strTarget.Left(strTarget.ReverseFind(_T('.')));
+				CString currentTimestamp = CTime::GetCurrentTime().Format(_T("%Y%m%d%H%M%S"));
+				CString newFileName = fileName + _T(" (") + currentTimestamp + _T(")") + fileExtension;
+				theApp.Message(MSG_DEBUG, _T("File \"%s\" already exists in the destination folder, renaming it to %s"),
+					(LPCTSTR)strTarget, (LPCTSTR)newFileName);
+				strTarget = newFileName;
+			}
+
 			// Move/copy file using very long filenames
 			bSuccess = MoveFileWithProgress( CString( _T("\\\\?\\") ) + sPath,
 				CString( _T("\\\\?\\") ) + strTarget, lpProgressRoutine, pTask,
