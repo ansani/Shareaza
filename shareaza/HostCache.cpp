@@ -1,7 +1,7 @@
 //
 // HostCache.cpp
 //
-// Copyright (c) Shareaza Development Team, 2002-2015.
+// Copyright (c) Shareaza Development Team, 2002-2017.
 // This file is part of SHAREAZA (shareaza.sourceforge.net)
 //
 // Shareaza is free software; you can redistribute it
@@ -97,7 +97,7 @@ BOOL CHostCache::Load()
 				ar.Abort();
 				pFile.Abort();
 				pException->Delete();
-				theApp.Message( MSG_ERROR, _T("Failed to load host cache: %s"), strFile );
+				theApp.Message( MSG_ERROR, _T("Failed to load host cache: %s"), (LPCTSTR)strFile );
 			}
 			pFile.Close();
 		}
@@ -105,11 +105,11 @@ BOOL CHostCache::Load()
 		{
 			pFile.Abort();
 			pException->Delete();
-			theApp.Message( MSG_ERROR, _T("Failed to load host cache: %s"), strFile );
+			theApp.Message( MSG_ERROR, _T("Failed to load host cache: %s"), (LPCTSTR)strFile );
 		}
 	}
 	else
-		theApp.Message( MSG_ERROR, _T("Failed to load host cache: %s"), strFile );
+		theApp.Message( MSG_ERROR, _T("Failed to load host cache: %s"), (LPCTSTR)strFile );
 
 	if ( Gnutella2.IsEmpty() )	CheckMinimumServers( PROTOCOL_G2 );
 	if ( Gnutella1.IsEmpty() )	CheckMinimumServers( PROTOCOL_G1 );
@@ -130,7 +130,7 @@ BOOL CHostCache::Save()
 	if ( ! pFile.Open( strTemp, CFile::modeWrite | CFile::modeCreate | CFile::shareExclusive | CFile::osSequentialScan ) )
 	{
 		DeleteFile( strTemp );
-		theApp.Message( MSG_ERROR, _T("Failed to save host cache: %s"), strTemp );
+		theApp.Message( MSG_ERROR, _T("Failed to save host cache: %s"), (LPCTSTR)strTemp );
 		return FALSE;
 	}
 
@@ -151,7 +151,7 @@ BOOL CHostCache::Save()
 			pFile.Abort();
 			pException->Delete();
 			DeleteFile( strTemp );
-			theApp.Message( MSG_ERROR, _T("Failed to save host cache: %s"), strTemp );
+			theApp.Message( MSG_ERROR, _T("Failed to save host cache: %s"), (LPCTSTR)strTemp );
 			return FALSE;
 		}
 		pFile.Close();
@@ -161,14 +161,14 @@ BOOL CHostCache::Save()
 		pFile.Abort();
 		pException->Delete();
 		DeleteFile( strTemp );
-		theApp.Message( MSG_ERROR, _T("Failed to save host cache: %s"), strTemp );
+		theApp.Message( MSG_ERROR, _T("Failed to save host cache: %s"), (LPCTSTR)strTemp );
 		return FALSE;
 	}
 
 	if ( ! MoveFileEx( strTemp, strFile, MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING ) )
 	{
 		DeleteFile( strTemp );
-		theApp.Message( MSG_ERROR, _T("Failed to save host cache: %s"), strFile );
+		theApp.Message( MSG_ERROR, _T("Failed to save host cache: %s"), (LPCTSTR)strFile );
 		return FALSE;
 	}
 
@@ -346,7 +346,7 @@ void CHostCacheList::Clear()
 //////////////////////////////////////////////////////////////////////
 // CHostCacheList host add
 
-CHostCacheHostPtr CHostCacheList::Add(LPCTSTR pszHost, WORD nPort, DWORD tSeen, LPCTSTR pszVendor, DWORD nUptime, DWORD nCurrentLeaves, DWORD nLeafLimit)
+CHostCacheHostPtr CHostCacheList::Add(LPCTSTR pszHost, WORD nPort, const IN_ADDR* pFromAddress, DWORD tSeen, LPCTSTR pszVendor, DWORD nUptime, DWORD nCurrentLeaves, DWORD nLeafLimit)
 {
 	CString strHost( pszHost );
 	strHost.Trim();
@@ -361,10 +361,10 @@ CHostCacheHostPtr CHostCacheList::Add(LPCTSTR pszHost, WORD nPort, DWORD tSeen, 
 			return NULL;
 	}
 
-	return Add( NULL, nPort, tSeen, pszVendor, nUptime, nCurrentLeaves, nLeafLimit, strHost );
+	return Add( NULL, nPort, pFromAddress, tSeen, pszVendor, nUptime, nCurrentLeaves, nLeafLimit, strHost );
 }
 
-CHostCacheHostPtr CHostCacheList::Add(const IN_ADDR* pAddress, WORD nPort, DWORD tSeen, LPCTSTR pszVendor, DWORD nUptime, DWORD nCurrentLeaves, DWORD nLeafLimit, LPCTSTR szAddress)
+CHostCacheHostPtr CHostCacheList::Add(const IN_ADDR* pAddress, WORD nPort, const IN_ADDR* pFromAddress, DWORD tSeen, LPCTSTR pszVendor, DWORD nUptime, DWORD nCurrentLeaves, DWORD nLeafLimit, LPCTSTR szAddress)
 {
 	ASSERT( pAddress || szAddress );
 
@@ -394,6 +394,8 @@ CHostCacheHostPtr CHostCacheList::Add(const IN_ADDR* pAddress, WORD nPort, DWORD
 				Network.IsFirewalledAddress( pAddress, TRUE ) ||
 			// check against IANA Reserved address.
 				Network.IsReserved( pAddress ) ||
+			// Check address is valid
+				( pFromAddress != NULL && ! Network.IsValidAddressFor( pFromAddress, pAddress ) ) ||
 			// Check security settings, don't add blocked IPs
 				Security.IsDenied( pAddress ) )
 				// Bad IP
@@ -408,6 +410,8 @@ CHostCacheHostPtr CHostCacheList::Add(const IN_ADDR* pAddress, WORD nPort, DWORD
 			Network.IsFirewalledAddress( pAddress, TRUE ) ||
 		// check against IANA Reserved address.
 			Network.IsReserved( pAddress ) ||
+		// Check address is valid
+			( pFromAddress != NULL && ! Network.IsValidAddressFor( pFromAddress, pAddress ) ) ||
 		// Check security settings, don't add blocked IPs
 			Security.IsDenied( pAddress ) )
 			// Bad IP
@@ -422,7 +426,7 @@ CHostCacheHostPtr CHostCacheList::Add(const IN_ADDR* pAddress, WORD nPort, DWORD
 		pHost = Find( szAddress );
 	if ( ! pHost )
 	{
-		if (Security.IsIgnoredCountry(theApp.GetCountryCode( *pAddress )))
+		if ( Security.IsIgnoredCountry( theApp.GetCountryCode( *pAddress ) ) )
 			return NULL;
 
 		// Create new host
@@ -573,7 +577,7 @@ void CHostCacheList::OnResolve(LPCTSTR szAddress, const IN_ADDR* pAddress, WORD 
 		else
 		{
 			// New host
-			pHost = Add( pAddress, nPort, 0, 0, 0, 0, 0, szAddress );
+			pHost = Add( pAddress, nPort, NULL, 0, 0, 0, 0, 0, szAddress );
 		}
 	}
 	else
@@ -908,7 +912,7 @@ int CHostCache::ImportHubList(CFile* pFile)
 			int nMaxusers = _tstoi( pHub->GetAttributeValue( _T("Maxusers") ) );
 
 			CQuickLock oLock( DC.m_pSection );
-			CHostCacheHostPtr pServer = DC.Add( NULL, protocolPorts[ PROTOCOL_DC ], 0,
+			CHostCacheHostPtr pServer = DC.Add( NULL, protocolPorts[ PROTOCOL_DC ], NULL, 0,
 				protocolNames[ PROTOCOL_DC ], 0, nUsers, nMaxusers, sAddress );
 			if ( pServer )
 			{
@@ -1050,6 +1054,25 @@ int CHostCache::ImportNodes(CFile* pFile)
 	return nServers;
 }
 
+bool CHostCache::EnoughServers(PROTOCOLID nProtocol) const
+{
+	switch ( nProtocol )
+	{
+	case PROTOCOL_G1:
+		return ! Settings.Gnutella1.EnableToday || Gnutella1.CountHosts( TRUE ) > 20;
+	case PROTOCOL_G2:
+		return ! Settings.Gnutella2.EnableToday || Gnutella2.CountHosts( TRUE ) > 25;
+	case PROTOCOL_ED2K:
+		return ! Settings.eDonkey.EnableToday || eDonkey.CountHosts( TRUE ) > 0;
+	case PROTOCOL_DC:
+		return ! Settings.DC.EnableToday || DC.CountHosts( TRUE ) > 0;
+	case PROTOCOL_BT:
+		return ! Settings.BitTorrent.EnableToday || BitTorrent.CountHosts( TRUE ) > 0;
+	default:
+		return true;
+	}
+}
+
 //////////////////////////////////////////////////////////////////////
 // CHostCache Check Minimum Servers
 
@@ -1129,7 +1152,7 @@ int CHostCache::LoadDefaultServers(PROTOCOLID nProtocol)
 	CStdioFile pFile;
 	if ( pFile.Open( strFile, CFile::modeRead | CFile::shareDenyWrite | CFile::osSequentialScan ) )
 	{
-		theApp.Message( MSG_NOTICE, _T("Loading default server list for %s: %s"), protocolNames[ nProtocol ], strFile );
+		theApp.Message( MSG_NOTICE, _T("Loading default server list for %s: %s"), protocolNames[ nProtocol ], (LPCTSTR)strFile );
 
 		for (;;)
 		{
@@ -1364,7 +1387,7 @@ void CHostCacheHost::Serialize(CArchive& ar, int nVersion)
 		if ( szaVendor[0] )
 		{
 			ReadArchive( ar, szaVendor + 1, 3 );
-			TCHAR szVendor[5] = { szaVendor[0], szaVendor[1], szaVendor[2], szaVendor[3], 0 };
+			TCHAR szVendor[5] = { (TCHAR)szaVendor[0], (TCHAR)szaVendor[1], (TCHAR)szaVendor[2], (TCHAR)szaVendor[3], 0 };
 			m_pVendor = VendorCache.Lookup( szVendor );
 		}
 
@@ -1527,7 +1550,7 @@ bool CHostCacheHost::ConnectTo(BOOL bAutomatic)
 
 	if ( m_pAddress.s_addr != INADDR_ANY )
 		return Neighbours.ConnectTo( m_pAddress, m_nPort, m_nProtocol, bAutomatic ) != NULL;
-	
+
 	m_tConnect += 30; // Throttle for 30 seconds
 	return Network.ConnectTo( m_sAddress, m_nPort, m_nProtocol ) != FALSE;
 }

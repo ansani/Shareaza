@@ -255,7 +255,7 @@ BOOL CG1Neighbour::ProcessPackets()
 	CLockedBuffer pInputLocked( GetInput() );
 
 	CBuffer* pInput = m_pZInput ? m_pZInput : (CBuffer*)pInputLocked;
-	
+
 	return ProcessPackets( pInput );
 }
 
@@ -756,19 +756,19 @@ BOOL CG1Neighbour::OnPong(CG1Packet* pPacket)
 			m_nFileVolume = nVolume;
 
 			// Add the IP address and port number to the Gnutella host cache of computers we can try to connect to
-			HostCache.Gnutella1.Add( (IN_ADDR*)&nAddress, nPort, 0, strVendorCode, nUptime );
+			HostCache.Gnutella1.Add( (IN_ADDR*)&nAddress, nPort, &m_pHost.sin_addr, 0, strVendorCode, nUptime );
 
 			if ( bGDNA )
-				HostCache.G1DNA.Add( (IN_ADDR*)&nAddress, nPort, 0, strVendorCode, nUptime );
+				HostCache.G1DNA.Add( (IN_ADDR*)&nAddress, nPort, &m_pHost.sin_addr, 0, strVendorCode, nUptime );
 
 		} // This pong packet wasn't made by the remote computer, just sent to us by it
 		else if ( bUltrapeer )
 		{
 			// Add the IP address and port number to the Gnutella host cache of computers we can try to connect to
-			HostCache.Gnutella1.Add( (IN_ADDR*)&nAddress, nPort, 0, strVendorCode, nUptime );
+			HostCache.Gnutella1.Add( (IN_ADDR*)&nAddress, nPort, &m_pHost.sin_addr, 0, strVendorCode, nUptime );
 
 			if ( bGDNA )
-				HostCache.G1DNA.Add( (IN_ADDR*)&nAddress, nPort, 0, strVendorCode, nUptime );
+				HostCache.G1DNA.Add( (IN_ADDR*)&nAddress, nPort, &m_pHost.sin_addr, 0, strVendorCode, nUptime );
 		}
 	}
 
@@ -1133,7 +1133,7 @@ BOOL CG1Neighbour::OnClusterAdvisor(CG1Packet* pPacket)
 		// Read the IP address and port number from the packet, and add them to the Gnutella host cache
 		DWORD nAddress = pPacket->ReadLongLE();
 		WORD nPort     = pPacket->ReadShortLE();
-		HostCache.Gnutella1.Add( (IN_ADDR*)&nAddress, nPort, 0, _T( VENDOR_CODE ) );
+		HostCache.Gnutella1.Add( (IN_ADDR*)&nAddress, nPort, &m_pHost.sin_addr, 0, _T( VENDOR_CODE ) );
 	}
 
 	// Record that now was when we last received a cluster advisor packet from the remote computer
@@ -1153,7 +1153,7 @@ BOOL CG1Neighbour::OnPush(CG1Packet* pPacket)
 {
 	if ( pPacket->m_nLength < 26 )
 	{
-		theApp.Message( MSG_NOTICE, IDS_PROTOCOL_SIZE_PUSH, m_sAddress );
+		theApp.Message( MSG_NOTICE, IDS_PROTOCOL_SIZE_PUSH, (LPCTSTR)m_sAddress );
 		++Statistics.Current.Gnutella1.Dropped;
 		++m_nDropCount;
 		return TRUE;
@@ -1188,11 +1188,11 @@ BOOL CG1Neighbour::OnPush(CG1Packet* pPacket)
 		}
 	}
 
-	if ( ! nPort || ( pPacket->m_nHops && ( 
+	if ( ! nPort || ( pPacket->m_nHops && (
 		Network.IsFirewalledAddress( (IN_ADDR*)&nAddress ) ||
 		Network.IsReserved( (IN_ADDR*)&nAddress ) ) ) )
 	{
-		theApp.Message( MSG_NOTICE, IDS_PROTOCOL_ZERO_PUSH, m_sAddress );
+		theApp.Message( MSG_NOTICE, IDS_PROTOCOL_ZERO_PUSH, (LPCTSTR)m_sAddress );
 		++Statistics.Current.Gnutella1.Dropped;
 		++m_nDropCount;
 		return TRUE;

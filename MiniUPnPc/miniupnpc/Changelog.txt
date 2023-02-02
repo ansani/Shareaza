@@ -1,5 +1,17 @@
-$Id: Changelog.txt,v 1.222 2016/01/24 17:24:35 nanard Exp $
+$Id: Changelog.txt,v 1.227 2017/05/09 10:04:56 nanard Exp $
 miniUPnP client Changelog.
+
+2017/05/05:
+  Fix CVE-2017-8798   Thanks to tin/Team OSTStrom
+
+2016/11/11:
+  check strlen before memcmp in XML parsing portlistingparse.c
+  fix build under SOLARIS and CYGWIN
+
+2016/10/11:
+  Add python 3 compatibility to IGD test
+
+VERSION 2.0 : released 2016/04/19
 
 2016/01/24:
   change miniwget to return HTTP status code

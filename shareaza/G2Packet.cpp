@@ -129,7 +129,7 @@ CG2Packet* CG2Packet::New(G2_PACKET nType, CG1Packet* pWrap, int nMinTTL)
 	CG2Packet* pPacket = New( nType, FALSE );
 
 	GNUTELLAPACKET pHeader;
-	
+
 	pHeader.m_oGUID		= pWrap->m_oGUID.storage();
 	pHeader.m_nType		= pWrap->m_nType;
 	pHeader.m_nTTL		= min( pWrap->m_nTTL, BYTE(nMinTTL) );
@@ -326,9 +326,9 @@ BOOL CG2Packet::GetTo(Hashes::Guid& oGUID)
 	if ( pTest[1] != 0x10 ) return FALSE;
 	if ( pTest[2] != 'T' ) return FALSE;
 	if ( pTest[3] != 'O' ) return FALSE;
-	
+
 	CopyMemory( &oGUID[ 0 ], pTest + 4, oGUID.byteCount );
-	
+
 	return BOOL( oGUID.validate() );
 }
 
@@ -642,7 +642,7 @@ CString CG2Packet::Dump(DWORD nTotal)
 void CG2Packet::Debug(LPCTSTR pszReason) const
 {
 	CString strOutput;
-	strOutput.Format( L"[G2] %s Type: %s", pszReason, GetType() );
+	strOutput.Format( L"[G2] %s Type: %s", pszReason, (LPCTSTR)GetType() );
 	CPacket::Debug( strOutput );
 }
 
@@ -743,8 +743,17 @@ BOOL CG2Packet::OnPong(const SOCKADDR_IN* pHost)
 		m_nPosition = nOffset;
 	}
 
-	if ( bRelayed && ! Network.IsConnectedTo( &pHost->sin_addr ) )
-		Datagrams.SetStable();
+	
+
+	if ( bRelayed && ! Datagrams.IsStable() && ! Network.IsConnectedTo( &pHost->sin_addr ) ){
+		CHostCacheHostPtr pCache = HostCache.Gnutella2.Find( &pHost->sin_addr );
+		DWORD tNow = static_cast< DWORD >( time( NULL ) );
+		//If we firewaled than we can't get udp packed from host that we don't send it
+		if ( ! pCache )
+			Datagrams.SetStable();
+	}
+			
+	
 
 	return TRUE;
 }
@@ -797,7 +806,7 @@ BOOL CG2Packet::OnQuery(const SOCKADDR_IN* pHost)
 
 		return TRUE;
 	}
-	
+
 	if ( ! Network.QueryRoute->Add( pSearch->m_oGUID, &pSearch->m_pEndpoint ) )
 	{
 		// Ack without hub list
@@ -822,7 +831,7 @@ BOOL CG2Packet::OnQuery(const SOCKADDR_IN* pHost)
 	Neighbours.RouteQuery( pSearch, this, NULL, TRUE );
 
 	Network.OnQuerySearch( new CLocalSearch( pSearch, PROTOCOL_G2 ) );
-	
+
 	// Ack with hub list
 	Datagrams.Send( &pSearch->m_pEndpoint, Neighbours.CreateQueryWeb( pSearch->m_oGUID, true ) );
 
@@ -844,7 +853,7 @@ BOOL CG2Packet::OnQueryAck(const SOCKADDR_IN* pHost)
 	}
 
 	Hashes::Guid oGUID;
-	
+
 	if ( SearchManager.OnQueryAck( this, pHost, oGUID ) )
 	{
 		CNeighbour* pNeighbour = NULL;
@@ -1075,7 +1084,7 @@ BOOL CG2Packet::OnPush(const SOCKADDR_IN* pHost)
 
 	if ( ! SkipCompound( nLength, 6 ) )
 	{
-		theApp.Message( MSG_ERROR, _T("[G2] Invalid PUSH packet received from %s"), 
+		theApp.Message( MSG_ERROR, _T("[G2] Invalid PUSH packet received from %s"),
 			(LPCTSTR)inet_ntoa( pHost->sin_addr ) );
 		Statistics.Current.Gnutella2.Dropped++;
 		return FALSE;
@@ -1387,7 +1396,7 @@ BOOL CG2Packet::OnKHLA(const SOCKADDR_IN* pHost)
 			}
 
 			CHostCacheHostPtr pCached = HostCache.Gnutella2.Add(
-				(IN_ADDR*)&nAddress, nPort, tSeen, strVendor );
+				(IN_ADDR*)&nAddress, nPort, &pHost->sin_addr, tSeen, strVendor );
 			if ( pCached != NULL )
 			{
 				nCount++;
@@ -1402,7 +1411,7 @@ BOOL CG2Packet::OnKHLA(const SOCKADDR_IN* pHost)
 		{
 			IN_ADDR pMyAddress;
 			pMyAddress.s_addr = ReadLongLE();
-			Network.AcquireLocalAddress( pMyAddress );
+			Network.AcquireLocalAddress( pMyAddress, 0, &pHost->sin_addr );
 		}
 
 		m_nPosition = nNext;
@@ -1480,7 +1489,8 @@ BOOL CG2Packet::OnKHLR(const SOCKADDR_IN* pHost)
 
 			if ( pCachedHost->CanQuote( tNow ) &&
 				Neighbours.Get( pCachedHost->m_pAddress ) == NULL &&
-				! Network.IsSelfIP( pCachedHost->m_pAddress ) )
+				! Network.IsSelfIP( pCachedHost->m_pAddress ) &&
+				Network.IsValidAddressFor( &pHost->sin_addr , &pCachedHost->m_pAddress ) )
 			{
 
 				BOOL bCompound = ( pCachedHost->m_pVendor && pCachedHost->m_pVendor->m_sCode.GetLength() > 0 );

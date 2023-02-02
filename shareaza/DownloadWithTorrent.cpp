@@ -1,7 +1,7 @@
 //
 // DownloadWithTorrent.cpp
 //
-// Copyright (c) Shareaza Development Team, 2002-2015.
+// Copyright (c) Shareaza Development Team, 2002-2017.
 // This file is part of SHAREAZA (shareaza.sourceforge.net)
 //
 // Shareaza is free software; you can redistribute it
@@ -320,6 +320,25 @@ BOOL CDownloadWithTorrent::SetTorrent(const CBTInfo* pTorrent)
 		m_pTorrent = *pTorrent;
 	}
 
+	if ( m_nSize != SIZE_UNKNOWN && // Single file download
+		 m_pTorrent.IsAvailableInfo() && ( m_pTorrent.m_nSize == SIZE_UNKNOWN || m_pTorrent.m_nSize != m_nSize ) )
+		return FALSE;
+
+	if ( m_bBTHTrusted && validAndUnequal( m_oBTH, m_pTorrent.m_oBTH ) )
+		return FALSE;
+
+	if ( m_bTigerTrusted && validAndUnequal( m_oTiger, m_pTorrent.m_oTiger ) )
+		return FALSE;
+
+	if ( m_bSHA1Trusted && validAndUnequal( m_oSHA1, m_pTorrent.m_oSHA1 ) )
+		return FALSE;
+
+	if ( m_bED2KTrusted && validAndUnequal( m_oED2K, m_pTorrent.m_oED2K ) )
+		return FALSE;
+
+	if ( m_bMD5Trusted && validAndUnequal( m_oMD5, m_pTorrent.m_oMD5 ) )
+		return FALSE;
+
 	if ( m_pTorrent.m_nSize != SIZE_UNKNOWN )
 	{
 		m_nSize = m_pTorrent.m_nSize;
@@ -328,11 +347,6 @@ BOOL CDownloadWithTorrent::SetTorrent(const CBTInfo* pTorrent)
 	if ( m_pTorrent.m_nBitrate )
 	{
 		m_nBitrate = m_pTorrent.m_nBitrate;
-	}
-
-	if ( m_pTorrent.m_sName.GetLength() )
-	{
-		Rename( m_pTorrent.m_sName );
 	}
 
 	if ( m_pTorrent.m_oTiger )
@@ -654,7 +668,7 @@ void CDownloadWithTorrent::OnTrackerEvent(bool bSuccess, LPCTSTR pszReason, LPCT
 		// Lock on this tracker if we were searching for one
 		if ( m_pTorrent.GetTrackerMode() == CBTInfo::tMultiFinding )
 		{
-			theApp.Message( MSG_DEBUG , _T("[BT] Locked onto tracker %s"), m_pTorrent.GetTrackerAddress() );
+			theApp.Message( MSG_DEBUG , _T("[BT] Locked onto tracker %s"), (LPCTSTR)m_pTorrent.GetTrackerAddress() );
 			m_pTorrent.SetTrackerMode( CBTInfo::tMultiFound );
 		}
 	}
@@ -823,7 +837,7 @@ void CDownloadWithTorrent::ChokeTorrent(DWORD tNow)
 			(DWORD)m_pTorrentUploads.GetCount() != GetBTSourceCount() &&
 			CanStartTransfers( tNow ) )
 		{
-			theApp.Message( MSG_DEBUG, _T("Attempting to push-start a BitTorrent upload for %s"), m_pTorrent.m_sName );
+			theApp.Message( MSG_DEBUG, _T("Attempting to push-start a BitTorrent upload for %s"), (LPCTSTR)m_pTorrent.m_sName );
 			StartNewTransfer( tNow );
 		}
 	}

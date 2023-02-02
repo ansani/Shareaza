@@ -1,7 +1,7 @@
 //
 // StdAfx.h
 //
-// Copyright (c) Shareaza Development Team, 2002-2015.
+// Copyright (c) Shareaza Development Team, 2002-2017.
 // This file is part of SHAREAZA (shareaza.sourceforge.net)
 //
 // Shareaza is free software; you can redistribute it
@@ -26,14 +26,17 @@
 
 #pragma once
 
-#include "..\build.h"
+// Set "1" for release and "0" for alpha, beta, etc. daily builds
+#ifndef RELEASE_BUILD
+	#define RELEASE_BUILD 0
+#endif
 
 //
 // Configuration
 //
 
 #if 1
-
+#pragma warning ( disable : 4548 )
 #pragma warning ( disable : 4619 )	// #pragma warning : there is no warning number
 
 // Warnings that are normally ON by default
@@ -236,6 +239,7 @@ typedef CString StringType;
 
 // Case insensitive string to string map
 typedef CAtlMap< CString, CString, CStringElementTraitsI< CString > > CStringIMap;
+typedef CAtlList< CString, CStringElementTraitsI< CString > > CStringIList;
 
 //! \brief Hash function needed for CMap with const CString& as ARG_KEY.
 
@@ -738,7 +742,7 @@ inline bool IsFileNewerThan(LPCTSTR pszFile, const QWORD nMilliseconds)
 inline QWORD GetFileSize(LPCTSTR pszFile)
 {
 	WIN32_FILE_ATTRIBUTE_DATA fd = {};
-	if ( GetFileAttributesEx( pszFile, GetFileExInfoStandard, &fd ) )
+	if ( pszFile && pszFile[ 0 ] && GetFileAttributesEx( ( pszFile[ 0 ] == _T('\\') ) ? pszFile : ( CString( _T("\\\\?\\") ) + pszFile ), GetFileExInfoStandard, &fd ) )
 		return MAKEQWORD( fd.nFileSizeLow, fd.nFileSizeHigh );
 	else
 		return SIZE_UNKNOWN;

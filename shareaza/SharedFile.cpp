@@ -1,7 +1,7 @@
 //
 // SharedFile.cpp
 //
-// Copyright (c) Shareaza Development Team, 2002-2015.
+// Copyright (c) Shareaza Development Team, 2002-2017.
 // This file is part of SHAREAZA (shareaza.sourceforge.net)
 //
 // Shareaza is free software; you can redistribute it
@@ -638,7 +638,7 @@ void CLibraryFile::UpdateMetadata(const CDownload* pDownload)
 		else if ( CXMLElement* pBody = pDownload->m_pXML->GetFirstElement() )
 		{
 			// Recreate metadata
-			TRACE( _T("Using download XML:%s"), pBody->ToString( FALSE, TRUE ) );
+			TRACE( "Using download XML:%s", (LPCSTR)CT2A( pBody->ToString( FALSE, TRUE ) ) );
 			m_pSchema = SchemaCache.Get( pDownload->m_pXML->GetAttributeValue(
 				CXMLAttribute::schemaName ) );
 			m_pMetadata = pBody->Clone();
@@ -805,27 +805,39 @@ CTigerTree* CLibraryFile::GetTigerTree()
 
 CED2K* CLibraryFile::GetED2K()
 {
-	if ( ! m_oED2K ) return NULL;
-	if ( ! m_pFolder ) return NULL;
+	if ( ! m_oED2K )
+		// Not hashed yet
+		return NULL;
 
-	CED2K* pED2K = new CED2K();
+	if ( ! m_pFolder )
+		// Virtual file
+		return NULL;
 
-	if ( LibraryHashDB.GetED2K( m_nIndex, pED2K ) )
+	CAutoPtr< CED2K > pED2K( new CED2K() );
+	if ( ! pED2K )
+		// Out of memory
+		return NULL;
+
+	if ( ! LibraryHashDB.GetED2K( m_nIndex, pED2K ) )
+		// Database error
+		return NULL;
+
+	Hashes::Ed2kHash oRoot;
+	pED2K->GetRoot( &oRoot[ 0 ] );
+	oRoot.validate();
+	if ( m_oED2K != oRoot )
 	{
-		Hashes::Ed2kHash oRoot;
-		pED2K->GetRoot( &oRoot[ 0 ] );
-		oRoot.validate();
-		if ( m_oED2K == oRoot ) return pED2K;
-
+		// Wrong hash
 		LibraryHashDB.DeleteED2K( m_nIndex );
+
+		Library.RemoveFile( this );
+		m_oED2K.clear();
+		Library.AddFile( this );
+
+		return NULL;
 	}
 
-	delete pED2K;
-	Library.RemoveFile( this );
-	m_oED2K.clear();
-	Library.AddFile( this );
-
-	return NULL;
+	return pED2K.Detach();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -928,7 +940,7 @@ CString CLibraryFile::GetAlternateSources(CList< CString >* pState, int nMaximum
 				pSource->m_sURL.Find( _T("Z%2C http://") ) >= 0 )
 			{
 				// Ignore buggy URLs
-				TRACE( _T("CLibraryFile::GetAlternateSources() Bad URL: %s\n"), pSource->m_sURL );
+				TRACE( "CLibraryFile::GetAlternateSources() Bad URL: %s\n", (LPCSTR)CT2A( pSource->m_sURL ) );
 			}
 			else
 			{
@@ -1410,7 +1422,7 @@ BOOL CLibraryFile::PrepareDoc(LPCTSTR pszTemplate, CArray< CString >& oDocs) con
 			CString strReplace = pNode->GetValue();
 			if ( str == _T("seconds") || str == _T("minutes") )
 			{
-				double nTotalSecs = ( str == _T("minutes") ) ? 
+				double nTotalSecs = ( str == _T("minutes") ) ?
 					_tstof( (LPCTSTR)strReplace ) * 60 : _tstof( (LPCTSTR)strReplace );
 				int nSecs = int( nTotalSecs );
 				int nHours = nSecs / 3600;
@@ -1464,10 +1476,10 @@ BOOL CLibraryFile::PrepareDoc(LPCTSTR pszTemplate, CArray< CString >& oDocs) con
 			strHumanSize.Format( _T("%.2f MB"), (float)m_nSize / 1024 / 1024 );
 		else
 			strHumanSize.Format( _T("%.2f KB"), (float)m_nSize / 1024 );
-		ReplaceNoCase( strDoc, _T("$meta:size$"), strHumanSize ); 
+		ReplaceNoCase( strDoc, _T("$meta:size$"), strHumanSize );
 	}
 
-	if ( m_oSHA1 ) 
+	if ( m_oSHA1 )
 	{
 		strMagnet = _T("xt=urn:sha1:") + m_oSHA1.toString();
 
@@ -1476,7 +1488,7 @@ BOOL CLibraryFile::PrepareDoc(LPCTSTR pszTemplate, CArray< CString >& oDocs) con
 		ReplaceNoCase( strDoc, _T("$meta:gnutella$"), _T("gnutella://urn:sha1:") + m_oSHA1.toString() + _T('/') + strNameURI + _T('/') );
 	}
 
-	if ( m_oTiger ) 
+	if ( m_oTiger )
 	{
 		strMagnet = _T("xt=urn:tree:tiger/:") + m_oTiger.toString();
 
@@ -1522,7 +1534,7 @@ BOOL CLibraryFile::PrepareDoc(LPCTSTR pszTemplate, CArray< CString >& oDocs) con
 	ReplaceNoCase( strDoc, _T("$meta:magnet$"), strMagnet );
 
 	ReplaceNoCase( strDoc, _T("$meta:name$"), strFileName );
-	if ( ! m_sComments.IsEmpty() ) 
+	if ( ! m_sComments.IsEmpty() )
 		ReplaceNoCase( strDoc, _T("$meta:comments$"), m_sComments );
 
 	CString strNumber;

@@ -1,7 +1,7 @@
 //
 // Download.cpp
 //
-// Copyright (c) Shareaza Development Team, 2002-2014.
+// Copyright (c) Shareaza Development Team, 2002-2017.
 // This file is part of SHAREAZA (shareaza.sourceforge.net)
 //
 // Shareaza is free software; you can redistribute it
@@ -66,6 +66,8 @@ CDownload::CDownload() :
 ,	m_tSaved		( 0 )
 ,	m_tBegan		( 0 )
 ,	m_bDownloading	( false )
+,	m_nCompletedAtBegan ( 0 )
+,	m_nStartFrom	( 0 )
 #pragma warning(suppress:4355) // 'this' : used in base member initializer list
 ,	m_pTask			( this )
 ,	m_bStableName	( false )
@@ -145,7 +147,7 @@ void CDownload::Pause(BOOL bRealPause)
 	if ( m_bComplete || m_bPaused )
 		return;
 
-	theApp.Message( MSG_NOTICE, IDS_DOWNLOAD_PAUSED, GetDisplayName() );
+	theApp.Message( MSG_NOTICE, IDS_DOWNLOAD_PAUSED, (LPCTSTR)GetDisplayName() );
 
 	m_bTempPaused = TRUE;
 
@@ -288,6 +290,11 @@ void CDownload::StartTrying()
 
 	m_tBegan = GetTickCount();
 	m_nCompletedAtBegan = GetVolumeComplete();
+
+	if ( ! GetEmptyFragmentList().empty() )
+		SetStartFrom( GetEmptyFragmentList().begin()->begin() );
+	else
+		SetStartFrom();
 }
 
 QWORD CDownload::GetRealSpeed()
@@ -298,15 +305,23 @@ QWORD CDownload::GetRealSpeed()
 	return 0;
 }
 
-QWORD CDownload::GetNonRandomEnd()
+void CDownload::SetStartFrom(QWORD nStartFrom)
+{
+	m_nStartFrom = nStartFrom;
+	m_tStartFromSet = GetTickCount();
+}
+
+QWORD CDownload::GetNonRandomEnd(bool bForce)
 {
 	if ( m_nBitrate < 8 )
 		return 0;
 
 	QWORD nByterate = ( m_nBitrate / 8 );
-	
-	if ( Settings.Downloads.MediaBuffer && m_tBegan > 0 && ( GetRealSpeed() > nByterate || GetAverageSpeed() > nByterate ))
-		return m_nCompletedAtBegan + ( ( ( GetTickCount() - m_tBegan + Settings.Downloads.MediaBuffer ) / 1000 ) * nByterate );
+
+	if ( Settings.Downloads.MediaBuffer && m_tStartFromSet > 0 &&
+		( GetRealSpeed() > nByterate || GetAverageSpeed() > nByterate || bForce ) )
+		return m_nStartFrom + ( ( ( GetTickCount() - m_tStartFromSet + Settings.Downloads.MediaBuffer ) / 1000 ) * nByterate );
+
 	return 0;
 }
 
@@ -400,7 +415,7 @@ CString CDownload::GetDownloadStatus() const
 	else if ( IsDownloading() )
 	{
 		DWORD nTime = GetTimeRemaining();
-	
+
 		if ( nTime == 0xFFFFFFFF )
 			LoadString( strText, IDS_STATUS_ACTIVE );
 		else if ( nTime == 0 )
@@ -553,7 +568,7 @@ void CDownload::OnRun()
 			// Calculate the current downloading state
 			if ( HasActiveTransfers() )
 				m_bDownloading = true;
-			
+
 			// Mutate regular download to torrent download
 			if ( Settings.BitTorrent.EnablePromote && m_oBTH && ! IsTorrent() )
 			{
@@ -606,9 +621,9 @@ void CDownload::OnRun()
 
 void CDownload::OnDownloaded()
 {
-	ASSERT( m_bComplete == false );
+//	ASSERT( m_bComplete == false );
 
-	theApp.Message( MSG_NOTICE, IDS_DOWNLOAD_COMPLETED, GetDisplayName() );
+	theApp.Message( MSG_NOTICE, IDS_DOWNLOAD_COMPLETED, (LPCTSTR)GetDisplayName() );
 
 	m_tCompleted = GetTickCount();
 	m_bDownloading = false;
@@ -702,10 +717,10 @@ BOOL CDownload::OpenDownload()
 	if ( m_nSize != SIZE_UNKNOWN && ! Downloads.IsSpaceAvailable( m_nSize, Downloads.dlPathIncomplete ) )
 	{
 		CString sFileError;
-		sFileError.Format( LoadString( IDS_DOWNLOAD_DISK_SPACE ), m_sName, Settings.SmartVolume( m_nSize ) );
+		sFileError.Format( LoadString( IDS_DOWNLOAD_DISK_SPACE ), (LPCTSTR)m_sName, (LPCTSTR)Settings.SmartVolume( m_nSize ) );
 		SetFileError( ERROR_DISK_FULL, sFileError );
 
-		theApp.Message( MSG_ERROR, _T("%s"), sFileError );
+		theApp.Message( MSG_ERROR, _T("%s"), (LPCTSTR)sFileError );
 	}
 
 	return FALSE;
@@ -749,7 +764,7 @@ BOOL CDownload::SeedTorrent()
 	if ( IsSingleFileTorrent() )
 	{
 		// Refill missed hashes for single-file torrent
-		const CBTInfo::CBTFile* pBTFile = m_pTorrent.m_pFiles.GetHead();
+		CBTInfo::CBTFile* pBTFile = m_pTorrent.m_pFiles.GetHead();
 		if ( ! m_pTorrent.m_oSHA1 && pBTFile->m_oSHA1 )
 			m_pTorrent.m_oSHA1 = pBTFile->m_oSHA1;
 		if ( ! m_pTorrent.m_oTiger && pBTFile->m_oTiger )
@@ -758,7 +773,7 @@ BOOL CDownload::SeedTorrent()
 			m_pTorrent.m_oED2K = pBTFile->m_oED2K;
 		if ( ! m_pTorrent.m_oMD5 && pBTFile->m_oMD5 )
 			m_pTorrent.m_oMD5 = pBTFile->m_oMD5;
-		
+
 		// Refill missed hash for library file
 		CQuickLock oLock( Library.m_pSection );
 		if ( CLibraryFile* pLibraryFile = LibraryMaps.LookupFileByPath( pBTFile->FindFile() ) )
@@ -828,7 +843,7 @@ BOOL CDownload::Load(LPCTSTR pszName)
 		}
 		AND_CATCH_ALL( pException )
 		{
-			theApp.Message( MSG_ERROR, IDS_DOWNLOAD_FILE_OPEN_ERROR, m_sPath );
+			theApp.Message( MSG_ERROR, IDS_DOWNLOAD_FILE_OPEN_ERROR, (LPCTSTR)m_sPath );
 		}
 		END_CATCH_ALL
 
@@ -853,7 +868,7 @@ BOOL CDownload::Load(LPCTSTR pszName)
 		}
 		AND_CATCH_ALL( pException )
 		{
-			theApp.Message( MSG_ERROR, IDS_DOWNLOAD_FILE_OPEN_ERROR, m_sPath + _T(".sav") );
+			theApp.Message( MSG_ERROR, IDS_DOWNLOAD_FILE_OPEN_ERROR, (LPCTSTR)( m_sPath + _T(".sav") ) );
 		}
 		END_CATCH_ALL
 
@@ -960,7 +975,7 @@ BOOL CDownload::OnVerify(const CLibraryFile* pFile, TRISTATE bVerified)
 		const CString strExt = PathFindExtension( pFile->GetPath() );
 		if ( strExt.CompareNoCase( _T(".torrent") ) == 0 )
 		{
-			theApp.Message( MSG_DEBUG, _T("Auto-starting torrent file: %s"), pFile->GetPath() );
+			theApp.Message( MSG_DEBUG, _T("Auto-starting torrent file: %s"), (LPCTSTR)pFile->GetPath() );
 			theApp.OpenTorrent( pFile->GetPath(), TRUE );
 		}
 	}

@@ -1,7 +1,7 @@
 ;
 ; main.iss
 ;
-; Copyright (c) Shareaza Development Team, 2002-2016.
+; Copyright (c) Shareaza Development Team, 2002-2017.
 ; This file is part of SHAREAZA (shareaza.sourceforge.net)
 ;
 ; Shareaza is free software; you can redistribute it
@@ -29,8 +29,10 @@
   #error Inno Setup UNICODE version is needed for this script
 #endif
 
-; Project definitions
-#include SourcePath + "..\..\build.h"
+; Set "1" for release and "0" for alpha, beta, etc. daily builds
+#ifndef RELEASE_BUILD
+	#define RELEASE_BUILD 0
+#endif
 
 ; Test for VS2010
 #ifexist SourcePath + "..\..\vc10\Win32\Release\Shareaza.exe"
@@ -62,6 +64,40 @@
     #error Found a few Shareaza.exe files, you need to leave only one
   #endif
   #define Compiler "vc10"
+  #define PlatformName "x64"
+  #define ConfigurationName "Debug"
+#endif
+
+; Test for VS2013
+#ifexist SourcePath + "..\..\vc12\Win32\Release\Shareaza.exe"
+  #ifdef Compiler
+    #error Found a few Shareaza.exe files, you need to leave only one
+  #endif
+  #define Compiler "vc12"
+  #define PlatformName "Win32"
+  #define ConfigurationName "Release"
+#endif
+#ifexist SourcePath + "..\..\vc12\x64\Release\Shareaza.exe"
+  #ifdef Compiler
+    #error Found a few Shareaza.exe files, you need to leave only one
+  #endif
+  #define Compiler "vc12"
+  #define PlatformName "x64"
+  #define ConfigurationName "Release"
+#endif
+#ifexist SourcePath + "..\..\vc12\Win32\Debug\Shareaza.exe"
+  #ifdef Compiler
+    #error Found a few Shareaza.exe files, you need to leave only one
+  #endif
+  #define Compiler "vc12"
+  #define PlatformName "Win32"
+  #define ConfigurationName "Debug"
+#endif
+#ifexist SourcePath + "..\..\vc12\x64\Debug\Shareaza.exe"
+  #ifdef Compiler
+    #error Found a few Shareaza.exe files, you need to leave only one
+  #endif
+  #define Compiler "vc12"
   #define PlatformName "x64"
   #define ConfigurationName "Debug"
 #endif
@@ -134,6 +170,40 @@
   #define ConfigurationName "Debug"
 #endif
 
+; Test for VS2017
+#ifexist SourcePath + "..\..\vc141\Win32\Release\Shareaza.exe"
+  #ifdef Compiler
+    #error Found a few Shareaza.exe files, you need to leave only one
+  #endif
+  #define Compiler "vc141"
+  #define PlatformName "Win32"
+  #define ConfigurationName "Release"
+#endif
+#ifexist SourcePath + "..\..\vc141\x64\Release\Shareaza.exe"
+  #ifdef Compiler
+    #error Found a few Shareaza.exe files, you need to leave only one
+  #endif
+  #define Compiler "vc141"
+  #define PlatformName "x64"
+  #define ConfigurationName "Release"
+#endif
+#ifexist SourcePath + "..\..\vc141\Win32\Debug\Shareaza.exe"
+  #ifdef Compiler
+    #error Found a few Shareaza.exe files, you need to leave only one
+  #endif
+  #define Compiler "vc141"
+  #define PlatformName "Win32"
+  #define ConfigurationName "Debug"
+#endif
+#ifexist SourcePath + "..\..\vc141\x64\Debug\Shareaza.exe"
+  #ifdef Compiler
+    #error Found a few Shareaza.exe files, you need to leave only one
+  #endif
+  #define Compiler "vc141"
+  #define PlatformName "x64"
+  #define ConfigurationName "Debug"
+#endif
+
 #ifndef Compiler
   #error No Shareaza.exe files are found, compile some
 #endif
@@ -156,18 +226,18 @@
 
 ; Output files names
 #if Str(RELEASE_BUILD) == "1" && ConfigurationName == "Release"
-  #define output_name  internal_name + "_" + version + "_" + PlatformName
-  #define symbols_name internal_name + "_" + version + "_" + PlatformName + "_Symbols.7z"
-  #define source_name  internal_name + "_" + version + "_Source.7z"
+  #define output_name  "i" + internal_name + "_" + version + "_" + PlatformName
+  #define symbols_name "i" + internal_name + "_" + version + "_" + PlatformName + "_Symbols.7z"
+  #define source_name  "i" + internal_name + "_" + version + "_Source.7z"
 #else
   #ifdef REVISION
-    #define output_name  internal_name + "_" + version + "_" + PlatformName + "_" + ConfigurationName + "_" + REVISION + "_" + date
-    #define symbols_name internal_name + "_" + PlatformName + "_" + ConfigurationName + "_" + REVISION + "_" + date + "_Symbols.7z"
-    #define source_name  internal_name + "_" + REVISION + "_Source.7z"
+    #define output_name  "i" + internal_name + "_" + version + "_" + PlatformName + "_" + ConfigurationName + "_" + REVISION + "_" + date
+    #define symbols_name "i" + internal_name + "_" + PlatformName + "_" + ConfigurationName + "_" + REVISION + "_" + date + "_Symbols.7z"
+    #define source_name  "i" + internal_name + "_" + REVISION + "_Source.7z"
   #else
-    #define output_name  internal_name + "_" + version + "_" + PlatformName + "_" + ConfigurationName + "_" + date
-    #define symbols_name internal_name + "_" + version + "_" + PlatformName + "_" + ConfigurationName + "_" + date + "_Symbols.7z"
-    #define source_name  internal_name + "_" + version + "_Source.7z"
+    #define output_name  "i" + internal_name + "_" + version + "_" + PlatformName + "_" + ConfigurationName + "_" + date
+    #define symbols_name "i" + internal_name + "_" + version + "_" + PlatformName + "_" + ConfigurationName + "_" + date + "_Symbols.7z"
+    #define source_name  "i" + internal_name + "_" + version + "_Source.7z"
   #endif
 #endif
 
@@ -245,9 +315,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"
 Name: "quicklaunch"; Description: "{cm:CreateQuickLaunchIcon}"
 Name: "firewall"; Description: "{cm:tasks_firewall}"; MinVersion: 5.1sp2
 Name: "upnp"; Description: "{cm:tasks_upnp}"; MinVersion: 5.1; Check: CanUserModifyServices
-#if Str(RELEASE_BUILD) == "1"
 Name: "deleteoldsetup"; Description: "{cm:tasks_deleteoldsetup}"; Check: EnableDeleteOldSetup
-#endif
 Name: "resetdiscoveryhostcache"; Description: "{cm:tasks_resetdiscoveryhostcache}"; Flags: unchecked
 
 [Files]
@@ -1130,4 +1198,4 @@ end;
 
 #expr SaveToFile(SourcePath + "..\builds\Preprocessed.iss")
 #expr Exec( Zip, "a -y -mx=9 builds\" + symbols_name + " ""..\" + Compiler + "\" + PlatformName + "\" + ConfigurationName + "\*.pdb""", ".." )
-#expr Exec( Zip, "a -y -mx=9 -r -x!.vs -x!.svn -x!.git -x!setup\builds\*.exe -x!setup\builds\*.txt -x!setup\builds\*.iss -x!Win32 -x!x64 -x!.vs -x!ipch -x!*.7z -x!*.log -x!*.bak -x!*.VC.db -x!*.VC.opendb -x!*.tmp -x!*.sdf -x!*.suo -x!*.ncb -x!*.user -x!*.opensdf builds\" + source_name + " ..", ".." )
+#expr Exec( Zip, "a -y -mx=9 -r -x!.vs -x!.svn -x!.git -x!setup\builds\*.exe -x!setup\builds\*.txt -x!setup\builds\*.iss -x!Win32 -x!x64 -x!.vs -x!ipch -x!*.torrent -x!*.7z -x!*.log -x!*.bak -x!*.VC.db -x!*.VC.opendb -x!*.tmp -x!*.sdf -x!*.suo -x!*.ncb -x!*.user -x!*.opensdf builds\" + source_name + " ..", ".." )

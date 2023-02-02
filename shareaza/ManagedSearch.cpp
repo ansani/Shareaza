@@ -1,7 +1,7 @@
 //
 // ManagedSearch.cpp
 //
-// Copyright (c) Shareaza Development Team, 2002-2014.
+// Copyright (c) Shareaza Development Team, 2002-2017.
 // This file is part of SHAREAZA (shareaza.sourceforge.net)
 //
 // Shareaza is free software; you can redistribute it
@@ -193,7 +193,7 @@ BOOL CManagedSearch::Execute(int nPriorityClass)
 	BOOL bSuccess = ExecuteNeighbours( tTicks, tSecs );
 
 	// G1 multicast search. (UDP)
-	if ( Settings.Gnutella1.EnableToday &&
+	if ( Settings.Gnutella1.EnableToday && Settings.Connection.EnableMulticast &&
 		 m_bAllowG1 &&
 		 tTicks > m_tLastG1 + Settings.Gnutella1.QueryGlobalThrottle &&
 		 Network.IsListening() )
@@ -374,8 +374,7 @@ BOOL CManagedSearch::ExecuteNeighbours(const DWORD tTicks, const DWORD tSecs)
 				m_tMoreResults = 0;
 
 				//Display message in system window
-				theApp.Message( MSG_INFO, IDS_NETWORK_SEARCH_SENT, m_pSearch->GetSearch(),
-					(LPCTSTR)CString( inet_ntoa( pNeighbour->m_pHost.sin_addr ) ) );
+				theApp.Message( MSG_INFO, IDS_NETWORK_SEARCH_SENT, (LPCTSTR)m_pSearch->GetSearch(), (LPCTSTR)CString( inet_ntoa( pNeighbour->m_pHost.sin_addr ) ) );
 
 				switch ( pNeighbour->m_nProtocol )
 				{
@@ -660,7 +659,7 @@ BOOL CManagedSearch::ExecuteDonkeyMesh(const DWORD /*tTicks*/, const DWORD tSecs
 		// Make sure this host can be queried (now)
 		if ( ! pHost->CanQuery( tSecs ) )
 			continue;
-		
+
 		// Never re-query eDonkey2000 servers
 		DWORD tLastQuery;
 		if ( m_pNodes.Lookup( pHost->m_pAddress.s_addr, tLastQuery ) )

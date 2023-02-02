@@ -1,7 +1,7 @@
 //
 // Settings.h
 //
-// Copyright (c) Shareaza Development Team, 2002-2015.
+// Copyright (c) Shareaza Development Team, 2002-2017.
 // This file is part of SHAREAZA (shareaza.sourceforge.net)
 //
 // Shareaza is free software; you can redistribute it
@@ -75,6 +75,7 @@ public:
 		DWORD		LastSettingsIndex;			// Top item index of Advanced Settings list
 		bool		SearchPanelResults;			// Search Results Panel state (open or closed)
 		CString		AntiVirus;					// Anti-virus path or CLSID
+		bool		UnlimitedSettings;			// Disable min/max for settings
 	} General;
 
 	struct sVersionCheck
@@ -284,6 +285,10 @@ public:
 		bool		SkipWANIPSetup;				// UPnP: Skip WANIPConn1 device setup
 		DWORD		ZLibCompressionLevel;		// ZLib compression level: 0(none/fastest)..9(best/slowest)
 		string_set	IgnoredCountry;
+		bool		EnableMulticast;			// Send and accept multi-cast packets (default = true)
+		bool		MulticastLoop;				// Use multi-cast loopback (for debugging, default = false)
+		DWORD		MulticastTTL;				// TTL for multi-cast packets (default = 1)
+		bool		EnableBroadcast;			// Send and accept broadcast packets (for LAN, default = false)
 	} Connection;
 
 	struct sBandwidth
@@ -443,7 +448,7 @@ public:
 		DWORD		DefaultServerFlags;			// Default server flags (for UDP searches)
 		bool		Endgame;					// Allow endgame mode when completing downloads. (Download same chunk from multiple sources)
 		bool		LargeFileSupport;			// Allow 64 bit file sizes
-		DWORD		AutoDiscovery;				// Auto query for a new server list using discovery services
+		bool		AutoDiscovery;				// Auto query for a new server list using discovery services
 	} eDonkey;
 
 	struct sDC
@@ -454,7 +459,7 @@ public:
 		DWORD		QueryThrottle;				// Throttle for DC++ neighbor searches (s), default: two minutes delay
 		DWORD		ReAskTime;					// How often Shareaza re-ask a remote client about download (ms), default: every minute
 		DWORD		DequeueTime;				// Timeout for remote client confirmation of upload queue (ms), default: 5 min
-		DWORD		AutoDiscovery;				// Auto query for a new server list using discovery services
+		bool		AutoDiscovery;				// Auto query for a new server list using discovery services
 	} DC;
 
 	struct sBitTorrent

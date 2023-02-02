@@ -1,7 +1,7 @@
 //
 // Settings.cpp
 //
-// Copyright (c) Shareaza Development Team, 2002-2015.
+// Copyright (c) Shareaza Development Team, 2002-2017.
 // This file is part of SHAREAZA (shareaza.sourceforge.net)
 //
 // Shareaza is free software; you can redistribute it
@@ -98,6 +98,7 @@ void CSettings::Load()
 	Add( _T(""), _T("SearchLog"), &General.SearchLog, true );
 	Add( _T(""), _T("UserPath"), &General.UserPath );
 	Add( _T(""), _T("DialogScan"), &General.DialogScan, false );
+	Add( _T(""), _T("UnlimitedSettings"), &General.UnlimitedSettings, false );
 
 	Add( _T("Settings"), _T("AlwaysOpenURLs"), &General.AlwaysOpenURLs, false );
 	Add( _T("Settings"), _T("CloseMode"), &General.CloseMode, 0, 1, 0, 3 );
@@ -302,6 +303,14 @@ void CSettings::Load()
 	Add( _T("Connection"), _T("UPnPTimeout"), &Connection.UPnPTimeout, 5*1000, 1, 0, 60*1000, _T(" ms") );
 	Add( _T("Connection"), _T("ZLibCompressionLevel"), &Connection.ZLibCompressionLevel, 9, 1, 0, 9, _T(" level") ); 
 	Add( _T("Connection"), _T("IgnoredCountry"), &Connection.IgnoredCountry, _T("|TW|HK|CN|") );
+	Add( _T("Connection"), _T("EnableMulticast"), &Connection.EnableMulticast, true );
+	Add( _T("Connection"), _T("MulticastLoop"), &Connection.MulticastLoop, false );
+	Add( _T("Connection"), _T("MulticastTTL"), &Connection.MulticastTTL, 1, 1, 0, 255 );
+#ifdef LAN_MODE
+	Add( _T("Connection"), _T("EnableBroadcast"), &Connection.EnableBroadcast, true );
+#else  // LAN_MODE
+	Add( _T("Connection"), _T("EnableBroadcast"), &Connection.EnableBroadcast, false );
+#endif // LAN_MODE
 
 	Add( _T("Bandwidth"), _T("Downloads"), &Bandwidth.Downloads, 0 );
 	Add( _T("Bandwidth"), _T("HubIn"), &Bandwidth.HubIn, 0, 128, 0, 8192, _T(" Kb/s") );
@@ -392,7 +401,7 @@ void CSettings::Load()
 	Add( _T("Gnutella2"), _T("NumPeers"), &Gnutella2.NumPeers, 1, 1, 0, 64 );
 #else // LAN_MODE
 	Add( _T("Gnutella2"), _T("NumHubs"), &Gnutella2.NumHubs, 2, 1, 1, 3 );
-	Add( _T("Gnutella2"), _T("NumLeafs"), &Gnutella2.NumLeafs, 300, 1, 50, 1024 );
+	Add( _T("Gnutella2"), _T("NumLeafs"), &Gnutella2.NumLeafs, 300, 1, 50, 0x7FFFFFFF );
 	Add( _T("Gnutella2"), _T("NumPeers"), &Gnutella2.NumPeers, 6, 1, 4, 64 );
 #endif // LAN_MODE
 	Add( _T("Gnutella2"), _T("PingRate"), &Gnutella2.PingRate, 15000, 1000, 5, 180, _T(" s") );
@@ -1730,7 +1739,7 @@ void CSettings::Item::Load()
 		ASSERT( ( m_nScale == 0 && m_nMin == 0 && m_nMax == 0 ) \
 			|| ( m_nScale && m_nMin < m_nMax ) );
 		*m_pDword = CRegistry::GetDword( m_szSection, m_szName, m_DwordDefault );
-		if ( m_nScale && m_nMin < m_nMax )
+		if ( ! Settings.General.UnlimitedSettings && m_nScale && m_nMin < m_nMax )
 		{
 			ASSERT( ( m_DwordDefault >= m_nMin * m_nScale ) \
 				&& ( m_DwordDefault <= m_nMax * m_nScale ) );
@@ -1817,7 +1826,7 @@ CString CSettings::SaveSet(const string_set* pSet)
 
 void CSettings::Item::Normalize()
 {
-	if ( m_pDword && m_nScale && m_nMin < m_nMax )
+	if ( ! Settings.General.UnlimitedSettings && m_pDword && m_nScale && m_nMin < m_nMax )
 	{
 		*m_pDword = max( min( *m_pDword, m_nMax * m_nScale ), m_nMin * m_nScale );
 	}

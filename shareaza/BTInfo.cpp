@@ -1,7 +1,7 @@
 //
 // BTInfo.cpp
 //
-// Copyright (c) Shareaza Development Team, 2002-2014.
+// Copyright (c) Shareaza Development Team, 2002-2017.
 // This file is part of SHAREAZA (shareaza.sourceforge.net)
 //
 // Shareaza is free software; you can redistribute it
@@ -26,6 +26,7 @@
 #include "BTInfo.h"
 #include "Buffer.h"
 #include "DownloadTask.h"
+#include "DownloadGroups.h"
 #include "Library.h"
 #include "SharedFile.h"
 #include "SharedFolder.h"
@@ -106,53 +107,73 @@ CBTInfo::CBTFile::CBTFile(const CBTInfo* pInfo, const CBTFile* pBTFile)
 	}
 }
 
-CString	CBTInfo::CBTFile::FindFile() const
+const CString& CBTInfo::CBTFile::FindFile()
 {
-	CQuickLock oLock( Library.m_pSection );
+	CString strShortPath;
+	int nSlash = m_sPath.Find( _T('\\') );
+	if ( nSlash != -1 )
+		strShortPath = m_sPath.Mid( nSlash + 1 );
+
+	CStringIList mFolders;
 
 	// Try complete folder
-	CString strFile = Settings.Downloads.CompletePath + _T("\\") + m_sPath;
-	if ( GetFileSize( CString( _T("\\\\?\\") ) + strFile ) != m_nSize )
+	mFolders.AddTail( Settings.Downloads.CompletePath );
+
+	// Try all possible download folders
+	DownloadGroups.GetFolders( mFolders );
+
+	// Try folder of original .torrent
+	mFolders.AddTail( m_pInfo->m_sPath.Left( m_pInfo->m_sPath.ReverseFind( _T('\\') ) ) );
+
+	for ( POSITION pos = mFolders.GetHeadPosition(); pos; )
 	{
-		// Try folder of original .torrent
-		CString strTorrentPath = m_pInfo->m_sPath.Left(
-			m_pInfo->m_sPath.ReverseFind( _T('\\') ) + 1 );
-		strFile = strTorrentPath + m_sPath;
-		if ( GetFileSize( CString( _T("\\\\?\\") ) + strFile ) != m_nSize )
+		const CString sFolder = mFolders.GetNext( pos );
+
+		CString strFile = sFolder + _T("\\") + m_sPath;
+		if ( GetFileSize( strFile ) == m_nSize )
 		{
-			// Try complete folder without outer file directory
-			CString strShortPath;
-			int nSlash = m_sPath.Find( _T('\\') );
-			if ( nSlash != -1 )
-				strShortPath = m_sPath.Mid( nSlash + 1 );
-			strFile = Settings.Downloads.CompletePath + _T("\\") + strShortPath;
-			if ( strShortPath.IsEmpty() || GetFileSize( CString( _T("\\\\?\\") ) + strFile ) != m_nSize )
+			m_sBestPath = strFile;
+			return m_sBestPath;
+		}
+
+		// ... without outer file directory
+		if ( ! strShortPath.IsEmpty() )
+		{
+			strFile = sFolder + _T("\\") + strShortPath;
+			if ( GetFileSize( strFile ) == m_nSize )
 			{
-				// Try folder of original .torrent without outer file directory
-				strFile = strTorrentPath + strShortPath;
-				if ( strShortPath.IsEmpty() || GetFileSize( CString( _T("\\\\?\\") ) + strFile ) != m_nSize )
-				{
-					// Try find by name only
-					const CLibraryFile* pShared = LibraryMaps.LookupFileByName( m_sName, m_nSize, FALSE, TRUE );
-					if ( pShared )
-						strFile = pShared->GetPath();
-					if ( ! pShared || GetFileSize( CString( _T("\\\\?\\") ) + strFile ) != m_nSize )
-					{
-						// Try find file by hash/size
-						pShared = LibraryMaps.LookupFileByHash( this, FALSE, TRUE );
-						if ( pShared )
-							strFile = pShared->GetPath();
-						if ( ! pShared || GetFileSize( CString( _T( "\\\\?\\" ) ) + strFile ) != m_nSize )
-						{
-							return m_sPath;
-						}
-					}
-				}
+				m_sBestPath = strFile;
+				return m_sBestPath;
 			}
 		}
 	}
 
-	return strFile;
+	CQuickLock oLock( Library.m_pSection );
+
+	// Try find file by hash/size
+	if ( const CLibraryFile* pShared = LibraryMaps.LookupFileByHash( this, FALSE, TRUE ) )
+	{
+		const CString strFile = pShared->GetPath();
+		if ( GetFileSize( strFile ) == m_nSize )
+		{
+			m_sBestPath = strFile;
+			return m_sBestPath;
+		}
+	}
+
+	// Try find by name only
+	if ( const CLibraryFile* pShared = LibraryMaps.LookupFileByName( m_sName, m_nSize, FALSE, TRUE ) )
+	{
+		const CString strFile = pShared->GetPath();
+		if ( GetFileSize( strFile ) == m_nSize )
+		{
+			m_sBestPath = strFile;
+			return m_sBestPath;
+		}
+	}
+
+	m_sBestPath.Empty();
+	return m_sPath;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -559,7 +580,7 @@ BOOL CBTInfo::SaveTorrentFile(const CString& sFolder)
 BOOL CBTInfo::LoadInfoPiece(BYTE *pPiece, DWORD nPieceSize, DWORD nInfoSize, DWORD nInfoPiece)
 {
 	ASSERT( nPieceSize <= MAX_PIECE_SIZE );
-	if ( nPieceSize > MAX_PIECE_SIZE ) 
+	if ( nPieceSize > MAX_PIECE_SIZE )
 		return FALSE;
 
 	if ( m_pSource.m_nLength == 0 && nInfoPiece == 0 )
@@ -603,7 +624,7 @@ BOOL CBTInfo::LoadInfoPiece(BYTE *pPiece, DWORD nPieceSize, DWORD nInfoSize, DWO
 int CBTInfo::NextInfoPiece() const
 {
 	if ( m_pSource.m_nLength == 0 )
-		return 0; 
+		return 0;
 	else if ( m_pSource.m_nLength > m_nInfoStart && ! m_nInfoSize )
 		return ( m_pSource.m_nLength - m_nInfoStart ) / MAX_PIECE_SIZE;
 
@@ -650,7 +671,7 @@ BOOL CBTInfo::CheckInfoData()
 		pBTH.Add( &m_pSource.m_pBuffer[pInfo->m_nPosition], (DWORD)pInfo->m_nSize );
 		pBTH.Finish();
 		pBTH.GetHash( &oBTH[0] );
-		
+
 		if ( oBTH == m_oBTH )
 		{
 			m_nInfoStart = (DWORD)pInfo->m_nPosition;
@@ -669,10 +690,10 @@ BOOL CBTInfo::LoadTorrentBuffer(const CBuffer* pBuffer)
 	auto_ptr< CBENode > pNode ( CBENode::Decode( pBuffer ) );
 	if ( ! pNode.get() )
 	{
-		theApp.Message( MSG_ERROR, _T("[BT] Failed to decode torrent data: %s"), pBuffer->ReadString( (size_t)-1 ) );
+		theApp.Message( MSG_ERROR, _T("[BT] Failed to decode torrent data: %s"), (LPCTSTR)pBuffer->ReadString( (size_t)-1 ) );
 		return FALSE;
 	}
- 
+
 	return LoadTorrentTree( pNode.get() );
 }
 
@@ -1012,7 +1033,7 @@ BOOL CBTInfo::LoadTorrentTree(const CBENode* pRoot)
 				}
 			}
 		}
-		
+
 		// BEP 19 : WebSeed - HTTP/FTP Seeding (GetRight style) : http://bittorrent.org/beps/bep_0019.html
 		// TODO: Support multi-file torrents
 		if ( const CBENode* pUrlList = pRoot->GetNode( "url-list" ) )
@@ -1261,8 +1282,8 @@ BOOL CBTInfo::LoadTorrentTree(const CBENode* pRoot)
 	oSHA.GetHash( &m_oBTH[ 0 ] );
 	m_oBTH.validate();
 
-	if ( m_pSource.m_nLength > 0 
-		 && pInfo->m_nSize 
+	if ( m_pSource.m_nLength > 0
+		 && pInfo->m_nSize
 		 && pInfo->m_nPosition + pInfo->m_nSize < m_pSource.m_nLength )
 	{
 		Hashes::BtHash oBTH;
@@ -1270,7 +1291,7 @@ BOOL CBTInfo::LoadTorrentTree(const CBENode* pRoot)
 		pBTH.Add( &m_pSource.m_pBuffer[pInfo->m_nPosition], (DWORD)pInfo->m_nSize );
 		pBTH.Finish();
 		pBTH.GetHash( &oBTH[0] );
-		
+
 		if ( oBTH == m_oBTH )
 		{
 			m_nInfoStart = (DWORD)pInfo->m_nPosition;

@@ -1,7 +1,7 @@
 //
 // BTPacket.h
 //
-// Copyright (c) Shareaza Development Team, 2002-2013.
+// Copyright (c) Shareaza Development Team, 2002-2017.
 // This file is part of SHAREAZA (shareaza.sourceforge.net)
 //
 // Shareaza is free software; you can redistribute it
@@ -29,6 +29,9 @@ class CBENode;
 
 #define BT_PROTOCOL_HEADER			"\023BitTorrent protocol"
 #define BT_PROTOCOL_HEADER_LEN		20
+
+#define DEFAULT_BT_MCAST_ADDRESS	"239.192.152.143"
+#define DEFAULT_BT_MCAST_PORT		6771
 
 // Protocol flags					   7 6 5 4 3 2 1 0
 #define BT_FLAG_EXTENSION			0x0000100000000000ui64
@@ -122,6 +125,7 @@ const LPCSTR BT_DICT_UT_PEX			= "ut_pex";
 const LPCSTR BT_DICT_VALUES			= "values";
 const LPCSTR BT_DICT_VENDOR			= "v";					// Client name and version (as a utf-8 string)
 const LPCSTR BT_DICT_YOURIP			= "yourip";				// External IP (IPv4 or IPv6)
+const LPCSTR BT_DICT_YOURIPPORT		= "ip";				    // External IP Port (IPv4 or IPv6) http://www.rasterbar.com/products/libtorrent/dht_sec.html
 
 //
 // Packet

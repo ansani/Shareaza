@@ -1,7 +1,7 @@
 //
 // SkinWindow.cpp
 //
-// Copyright (c) Shareaza Development Team, 2002-2015.
+// Copyright (c) Shareaza Development Team, 2002-2016.
 // This file is part of SHAREAZA (shareaza.sourceforge.net)
 //
 // Shareaza is free software; you can redistribute it
@@ -144,11 +144,7 @@ BOOL CSkinWindow::Parse(CXMLElement* pBase, const CString& strPath)
 
 		if ( pGroup->IsNamed( _T("target") ) )
 		{
-			CString strTarget = pGroup->GetAttributeValue( _T("window") );
-
-			if ( strTarget == _T("CMainTabBarCtrl") )
-				strTarget = strTarget;
-
+			const CString strTarget = pGroup->GetAttributeValue( _T("window") );
 			if ( strTarget.GetLength() )
 			{
 				m_sTargets += '|';
@@ -160,10 +156,10 @@ BOOL CSkinWindow::Parse(CXMLElement* pBase, const CString& strPath)
 		{
 			for ( POSITION posInner = pGroup->GetElementIterator() ; posInner ; )
 			{
-				CXMLElement* pXML = pGroup->GetNextElement( posInner );
+				const CXMLElement* pXML = pGroup->GetNextElement( posInner );
 				if ( ! pXML->IsNamed( _T("part") ) )
 				{
-					theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Unknown element in [parts] element"), pXML->ToString() );
+					theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Unknown element in [parts] element"), (LPCTSTR)pXML->ToString() );
 					continue;
 				}
 				if ( ! ParseRect( pXML, &rc ) ) continue;
@@ -213,10 +209,10 @@ BOOL CSkinWindow::Parse(CXMLElement* pBase, const CString& strPath)
 		{
 			for ( POSITION posInner = pGroup->GetElementIterator() ; posInner ; )
 			{
-				CXMLElement* pXML = pGroup->GetNextElement( posInner );
+				const CXMLElement* pXML = pGroup->GetNextElement( posInner );
 				if ( ! pXML->IsNamed( _T("anchor") ) )
 				{
-					theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Unknown element in [anchors] element"), pXML->ToString() );
+					theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Unknown element in [anchors] element"), (LPCTSTR)pXML->ToString() );
 					continue;
 				}
 
@@ -280,10 +276,10 @@ BOOL CSkinWindow::Parse(CXMLElement* pBase, const CString& strPath)
 
 			int nFontSize = Settings.Fonts.FontSize + 2, nFontWeight = FW_BOLD;
 			if ( strSize.GetLength() && _stscanf( strSize, _T("%i"), &nFontSize ) != 1 )
-				theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Bad [fontSize] attribute in [caption] element"), pGroup->ToString() );
+				theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Bad [fontSize] attribute in [caption] element"), (LPCTSTR)pGroup->ToString() );
 
 			if ( strWeight.GetLength() && _stscanf( strWeight, _T("%i"), &nFontWeight ) != 1 )
-				theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Bad [fontWeight] attribute in [caption] element"), pGroup->ToString() );
+				theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Bad [fontWeight] attribute in [caption] element"), (LPCTSTR)pGroup->ToString() );
 
 			LOGFONT lf = {};
 			lf.lfHeight			= nFontSize;
@@ -360,9 +356,9 @@ BOOL CSkinWindow::Parse(CXMLElement* pBase, const CString& strPath)
 			else if ( strRes.GetLength() > 0 )
 			{
 				UINT nResID = 0;
-				if ( _stscanf( strRes, _T("%lu"), &nResID ) != 1 )
+				if ( _stscanf( strRes, _T("%u"), &nResID ) != 1 )
 				{
-					theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Unknown [res] attribute in [image] element"), pGroup->ToString() );
+					theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Unknown [res] attribute in [image] element"), (LPCTSTR)pGroup->ToString() );
 					continue;
 				}
 
@@ -380,7 +376,7 @@ BOOL CSkinWindow::Parse(CXMLElement* pBase, const CString& strPath)
 
 			if ( hBitmap == NULL )
 			{
-				theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Cannot load image"), pGroup->ToString() );
+				theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Cannot load image"), (LPCTSTR)pGroup->ToString() );
 				continue;
 			}
 
@@ -416,15 +412,15 @@ BOOL CSkinWindow::Parse(CXMLElement* pBase, const CString& strPath)
 		else if ( pGroup->IsNamed( _T("minimumSize") ) )
 		{
 			CString strWidth = pGroup->GetAttributeValue( _T("width") );
-			if ( strWidth.GetLength() && _stscanf( strWidth, _T("%i"), &m_szMinSize.cx ) != 1 )
-				theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Bad [width] attribute in [minimumSize] element"), pGroup->ToString() );
+			if ( strWidth.GetLength() && _stscanf( strWidth, _T("%li"), &m_szMinSize.cx ) != 1 )
+				theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Bad [width] attribute in [minimumSize] element"), (LPCTSTR)pGroup->ToString() );
 
 			CString strHeight = pGroup->GetAttributeValue( _T("height") );
-			if ( strHeight.GetLength() && _stscanf( strHeight, _T("%i"), &m_szMinSize.cy ) != 1 )
-				theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Bad [height] attribute in [minimumSize] element"), pGroup->ToString() );
+			if ( strHeight.GetLength() && _stscanf( strHeight, _T("%li"), &m_szMinSize.cy ) != 1 )
+				theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Bad [height] attribute in [minimumSize] element"), (LPCTSTR)pGroup->ToString() );
 		}
 		else
-			theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Unknown element in [windowSkin] element"), pGroup->ToString() );
+			theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Unknown element in [windowSkin] element"), (LPCTSTR)pGroup->ToString() );
 	}
 
 	return ( m_bmSkin.m_hObject != NULL );
@@ -433,7 +429,7 @@ BOOL CSkinWindow::Parse(CXMLElement* pBase, const CString& strPath)
 //////////////////////////////////////////////////////////////////////
 // CSkinWindow parse helpers
 
-BOOL CSkinWindow::ParseRect(CXMLElement* pXML, CRect* pRect)
+BOOL CSkinWindow::ParseRect(const CXMLElement* pXML, CRect* pRect)
 {
 	CString strRect = pXML->GetAttributeValue( _T("rect") );
 	if ( strRect.GetLength() )
@@ -447,7 +443,7 @@ BOOL CSkinWindow::ParseRect(CXMLElement* pXML, CRect* pRect)
 			pRect->bottom = y + cy;
 		}
 		else
-			theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Invalid [rect] attribute"), pXML->ToString() );
+			theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Invalid [rect] attribute"), (LPCTSTR)pXML->ToString() );
 	}
 	else
 	{
@@ -462,7 +458,7 @@ BOOL CSkinWindow::ParseRect(CXMLElement* pXML, CRect* pRect)
 				pRect->right = pRect->bottom = 0;
 			}
 			else
-				theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Invalid [point] attribute"), pXML->ToString() );
+				theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Invalid [point] attribute"), (LPCTSTR)pXML->ToString() );
 		}
 	}
 
@@ -1317,7 +1313,7 @@ void CSkinWindow::SelectRegion(CWnd* pWnd)
 
 	for ( POSITION pos = m_pRegionXML->GetElementIterator() ; pos ; )
 	{
-		CXMLElement* pXML = m_pRegionXML->GetNextElement( pos );
+		const CXMLElement* pXML = m_pRegionXML->GetNextElement( pos );
 		if ( ! pXML->IsNamed( _T("shape") ) ) continue;
 
 		if ( ParseRect( pXML, &rcPart ) )
@@ -1354,7 +1350,7 @@ void CSkinWindow::SelectRegion(CWnd* pWnd)
 					nWidth, nHeight );
 			}
 			else
-				theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Bad [size] attribute in [roundRect] element"), pXML->ToString() );
+				theApp.Message( MSG_ERROR, IDS_SKIN_ERROR, _T("Bad [size] attribute in [roundRect] element"), (LPCTSTR)pXML->ToString() );
 		}
 		else
 		{
@@ -1412,7 +1408,7 @@ CSize CSkinWindow::GetRegionSize()
 
 	for ( POSITION pos = m_pRegionXML->GetElementIterator() ; pos ; )
 	{
-		CXMLElement* pXML = m_pRegionXML->GetNextElement( pos );
+		const CXMLElement* pXML = m_pRegionXML->GetNextElement( pos );
 		CRect rcPart;
 
 		if ( pXML->IsNamed( _T("shape") ) && ParseRect( pXML, &rcPart ) )

@@ -1,7 +1,7 @@
 //
 // DownloadTransferHTTP.cpp
 //
-// Copyright (c) Shareaza Development Team, 2002-2014.
+// Copyright (c) Shareaza Development Team, 2002-2017.
 // This file is part of SHAREAZA (shareaza.sourceforge.net)
 //
 // Shareaza is free software; you can redistribute it
@@ -443,26 +443,31 @@ BOOL CDownloadTransferHTTP::SendRequest()
 					Write( strLine );
 					Write( _P("\r\n") );
 				}
-				
+
 				if ( m_pDownload->IsShared() && m_pDownload->IsStarted() && Network.IsStable() )
 				{
-					if ( m_pSource->m_nGnutella < 2 )
-					{
-						strLine.Format( _T("%s:%u"),
-							(LPCTSTR)CString( inet_ntoa( Network.m_pHost.sin_addr ) ),
-							htons( Network.m_pHost.sin_port ) );
-						Write( _P("X-Alt: ") );
-					}
-					else
-					{
-						strLine = m_pDownload->GetURL( Network.m_pHost.sin_addr,
-							htons( Network.m_pHost.sin_port ) ) + _T(" ") +
-							TimeToString( time( NULL ) - 180 );
-						Write( _P("Alt-Location: ") );
-					}
-					Write( strLine );
-					Write( _P("\r\n") );
+					IN_ADDR MyAddress = Network.GetMyAddressFor( &m_pHost.sin_addr );
 					
+					if ( MyAddress.S_un.S_addr )
+					{
+						if ( m_pSource->m_nGnutella < 2 )
+						{
+							strLine.Format( _T("%s:%u"),
+								(LPCTSTR)CString( inet_ntoa( MyAddress ) ),
+								htons( Network.m_pHost.sin_port ) );
+							Write( _P("X-Alt: ") );
+						}
+						else
+						{
+							strLine = m_pDownload->GetURL( MyAddress,
+								htons( Network.m_pHost.sin_port ) ) + _T(" ") +
+								TimeToString( time( NULL ) - 180 );
+							Write( _P("Alt-Location: ") );
+						}
+						Write( strLine );
+						Write( _P("\r\n") );
+					}
+
 					if ( m_pSource->m_nGnutella < 2 )
 					{
 						strLine = m_pDownload->GetTopFailedSources( 15, PROTOCOL_G1 );
@@ -640,7 +645,7 @@ BOOL CDownloadTransferHTTP::ReadResponseLine()
 	{
 		strCode		= strLine.Mid( 5, 3 );
 		strMessage	= strLine.Mid( 8 );
-		theApp.Message( MSG_DEBUG, _T("HTTP with unknown version: %s"), strLine );
+		theApp.Message( MSG_DEBUG, _T("HTTP with unknown version: %s"), (LPCTSTR)strLine );
 		m_bKeepAlive = FALSE;
 	}
 	else
@@ -852,7 +857,7 @@ BOOL CDownloadTransferHTTP::OnHeaderLine(CString& strHeader, CString& strValue)
 		}
 		else
 		{
-			theApp.Message( MSG_DEBUG, _T( "Unknown transfer encoding: %s" ), strValue );
+			theApp.Message( MSG_DEBUG, _T( "Unknown transfer encoding: %s" ), (LPCTSTR)strValue );
 			Close( TRI_FALSE );
 			return FALSE;
 		}
@@ -942,21 +947,21 @@ BOOL CDownloadTransferHTTP::OnHeaderLine(CString& strHeader, CString& strValue)
 		ToLower( strValue );
 		
 		int nPos = strValue.Find( _T("position=") );
-		if ( nPos >= 0 ) _stscanf( strValue.Mid( nPos + 9 ), _T("%u"), &m_nQueuePos );
+		if ( nPos >= 0 ) _stscanf( strValue.Mid( nPos + 9 ), _T("%lu"), &m_nQueuePos );
 		
 		nPos = strValue.Find( _T("length=") );
-		if ( nPos >= 0 ) _stscanf( strValue.Mid( nPos + 7 ), _T("%u"), &m_nQueueLen );
+		if ( nPos >= 0 ) _stscanf( strValue.Mid( nPos + 7 ), _T("%lu"), &m_nQueueLen );
 		
 		DWORD nLimit = 0;
 		
 		nPos = strValue.Find( _T("pollmin=") );
-		if ( nPos >= 0 && _stscanf( strValue.Mid( nPos + 8 ), _T("%u"), &nLimit ) == 1 )
+		if ( nPos >= 0 && _stscanf( strValue.Mid( nPos + 8 ), _T("%lu"), &nLimit ) == 1 )
 		{
 			m_nRetryDelay = max( m_nRetryDelay, nLimit * 1000 + 3000  );
 		}
 		
 		nPos = strValue.Find( _T("pollmax=") );
-		if ( nPos >= 0 && _stscanf( strValue.Mid( nPos + 8 ), _T("%u"), &nLimit ) == 1 )
+		if ( nPos >= 0 && _stscanf( strValue.Mid( nPos + 8 ), _T("%lu"), &nLimit ) == 1 )
 		{
 			m_nRetryDelay = min( m_nRetryDelay, nLimit * 1000 - 8000 );
 		}
@@ -982,7 +987,7 @@ BOOL CDownloadTransferHTTP::OnHeaderLine(CString& strHeader, CString& strValue)
 	{
 		DWORD nLimit = 0;
 
-		if ( _stscanf( strValue, _T("%u"), &nLimit ) == 1 )
+		if ( _stscanf( strValue, _T("%lu"), &nLimit ) == 1 )
 		{
 			m_nRetryAfter = nLimit;
 		}
@@ -992,7 +997,7 @@ BOOL CDownloadTransferHTTP::OnHeaderLine(CString& strHeader, CString& strValue)
 	{
 		DWORD nLimit = 0;
 		
-		if ( _stscanf( strValue, _T("%u"), &nLimit ) != 1 )
+		if ( _stscanf( strValue, _T("%lu"), &nLimit ) != 1 )
 		{
 			Downloads.SetPerHostLimit( &m_pHost.sin_addr, nLimit );
 		}
@@ -1545,7 +1550,6 @@ BOOL CDownloadTransferHTTP::ReadTiger(bool bDropped)
 			}
 			
 			pInput->Remove( ( nBody + 3 ) & ~3 );
-			if ( nFlags & 2 ) break;
 		}
 		
 		pInput->Clear();
