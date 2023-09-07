@@ -82,6 +82,7 @@ END_MESSAGE_MAP()
 #define DOWNLOAD_COLUMN_DOWNLOADED	6
 #define DOWNLOAD_COLUMN_PERCENTAGE  7
 #define DOWNLOAD_COLUMN_COUNTRY		8
+#define DOWNLOAD_COLUMN_DATEADDED	9
 #define COLUMNS_TO_SORT				DOWNLOAD_COLUMN_PERCENTAGE - DOWNLOAD_COLUMN_TITLE
 
 //////////////////////////////////////////////////////////////////////////////
@@ -154,7 +155,8 @@ int CDownloadsCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	InsertColumn( DOWNLOAD_COLUMN_DOWNLOADED, _T("Downloaded"), LVCFMT_CENTER, 0 );
 	InsertColumn( DOWNLOAD_COLUMN_PERCENTAGE, _T("Complete"), LVCFMT_CENTER, 60 );
 	InsertColumn( DOWNLOAD_COLUMN_COUNTRY, _T("Country"), LVCFMT_LEFT, 60 );
-	
+	InsertColumn( DOWNLOAD_COLUMN_DATEADDED, _T("Date Added"), LVCFMT_LEFT, 60);
+
 	LoadColumnState();
 	
 	CoolInterface.LoadProtocolIconsTo( m_pProtocols );
@@ -1237,6 +1239,11 @@ void CDownloadsCtrl::PaintDownload(CDC& dc, const CRect& rcRow, CDownload* pDown
 			else
 				LoadString( strText, IDS_STATUS_UNKNOWN );
 			break;
+
+			case DOWNLOAD_COLUMN_DATEADDED:
+				strText = pDownload->GetDateAdded();
+			break;
+
 		}
 		
 		nTextLeft	= min( nTextLeft, int(rcCell.left) );

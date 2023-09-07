@@ -39,6 +39,7 @@
 #include "Transfers.h"
 #include "Uploads.h"
 #include "XML.h"
+#include <chrono>
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -46,6 +47,31 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+DWORD GetCurrentTimeInSeconds() {
+	// Get the current system time
+	SYSTEMTIME st;
+	GetSystemTime(&st);
+
+	// Convert the SYSTEMTIME to FILETIME
+	FILETIME ft;
+	SystemTimeToFileTime(&st, &ft);
+
+	// Convert the FILETIME to ULARGE_INTEGER to handle the large 64-bit value
+	ULARGE_INTEGER uli;
+	uli.LowPart = ft.dwLowDateTime;
+	uli.HighPart = ft.dwHighDateTime;
+
+	// Convert 100-nanosecond intervals since January 1, 1601 (UTC) to seconds since January 1, 1970 (UTC)
+	// Subtract the number of 100-nanosecond intervals from 1601 to 1970
+	const ULONGLONG EPOCH_DIFFERENCE = 116444736000000000ULL;
+	uli.QuadPart -= EPOCH_DIFFERENCE;
+
+	// Convert 100-nanosecond intervals to seconds
+	uli.QuadPart /= 10000000;
+
+	// Cast to DWORD. Note: This will overflow in 2106.
+	return static_cast<DWORD>(uli.QuadPart);
+}
 
 //////////////////////////////////////////////////////////////////////
 // CDownload construction
@@ -55,6 +81,7 @@ CDownload::CDownload() :
 ,	m_bExpanded		( Settings.Downloads.AutoExpand )
 ,	m_bSelected		( FALSE )
 ,	m_tCompleted	( 0 )
+,	m_tAdded		( GetCurrentTimeInSeconds() )
 ,	m_nRunCookie	( 0 )
 ,	m_nGroupCookie	( 0 )
 
@@ -384,6 +411,28 @@ bool CDownload::IsShared() const
 		( Settings.eDonkey.EnableToday && m_oED2K ) ||
 		( Settings.DC.EnableToday && m_oTiger ) ||
 		( Settings.BitTorrent.EnableToday && IsTorrent() && ( IsSeeding() || IsStarted() ) );
+}
+
+CString CDownload::GetDateAdded() const
+{
+	const ULONGLONG EPOCH_DIFFERENCE = 116444736000000000ULL;
+	ULARGE_INTEGER uli;
+	uli.QuadPart = static_cast<ULONGLONG>(m_tAdded) * 10000000 + EPOCH_DIFFERENCE;
+
+	// Convert ULARGE_INTEGER to FILETIME
+	FILETIME ft;
+	ft.dwLowDateTime = uli.LowPart;
+	ft.dwHighDateTime = uli.HighPart;
+
+	// Convert FILETIME to SYSTEMTIME
+	SYSTEMTIME st;
+	FileTimeToSystemTime(&ft, &st);
+
+	// Format the SYSTEMTIME to a CString
+	CString result;
+	result.Format(_T("%02d/%02d/%04d %02d:%02d:%02d"), st.wDay, st.wMonth, st.wYear, st.wHour, st.wMinute, st.wSecond);
+
+	return result;
 }
 
 CString CDownload::GetDownloadStatus() const
@@ -1036,6 +1085,7 @@ void CDownload::Serialize(CArchive& ar, int nVersion /* DOWNLOAD_SER_VERSION */)
 		ar << m_bShared;
 
 		ar << m_nSerID;
+		ar << m_tAdded;
 	}
 	else
 	{
@@ -1048,6 +1098,9 @@ void CDownload::Serialize(CArchive& ar, int nVersion /* DOWNLOAD_SER_VERSION */)
 
 		DownloadGroups.Link( this );
 
+		if (nVersion >= 44) ar >> m_tAdded;
+
+
 		if ( nVersion == 32 )
 		{
 			// Compatibility for CB Branch.
@@ -1057,6 +1110,8 @@ void CDownload::Serialize(CArchive& ar, int nVersion /* DOWNLOAD_SER_VERSION */)
 				ar >> sSearchKeyword;
 			}
 		}
+
+
 	}
 }
 
