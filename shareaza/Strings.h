@@ -22,6 +22,7 @@
 #pragma once
 
 #include <set>
+#include <functional>
 
 
 // Produces two arguments divided by comma, where first argument is a string itself
