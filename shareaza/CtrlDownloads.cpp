@@ -83,7 +83,7 @@ END_MESSAGE_MAP()
 #define DOWNLOAD_COLUMN_PERCENTAGE  7
 #define DOWNLOAD_COLUMN_COUNTRY		8
 #define DOWNLOAD_COLUMN_DATEADDED	9
-#define COLUMNS_TO_SORT				DOWNLOAD_COLUMN_PERCENTAGE - DOWNLOAD_COLUMN_TITLE
+#define COLUMNS_TO_SORT				DOWNLOAD_COLUMN_DATEADDED - DOWNLOAD_COLUMN_TITLE + 1
 
 //////////////////////////////////////////////////////////////////////////////
 // CDownloadsCtrl construction
@@ -170,7 +170,7 @@ int CDownloadsCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_pDeselect2		= NULL;
 
 	m_pbSortAscending	= new BOOL[COLUMNS_TO_SORT + 1];
-	for (int i=DOWNLOAD_COLUMN_TITLE; i <= DOWNLOAD_COLUMN_PERCENTAGE; i++)
+	for (int i=DOWNLOAD_COLUMN_TITLE; i < DOWNLOAD_COLUMN_DATEADDED; i++)
 		m_pbSortAscending[i]=TRUE;
 
 	return 0;
@@ -1724,6 +1724,12 @@ void CDownloadsCtrl::BubbleSortDownloads(int nColumn)  // BinaryInsertionSortDow
 						else
 							bRlBk = FALSE;
 						break;
+					case DOWNLOAD_COLUMN_DATEADDED:
+						if (x->GetDateAddedInSeconds() < y->GetDateAddedInSeconds())
+							bOK = TRUE;
+						else
+							bRlBk = FALSE;
+						break;
 				}//end switch
 			}
 			else
@@ -1774,6 +1780,12 @@ void CDownloadsCtrl::BubbleSortDownloads(int nColumn)  // BinaryInsertionSortDow
 						break;
 					case DOWNLOAD_COLUMN_PERCENTAGE:
 						if ( ((double)(x->GetVolumeComplete() ) / (double)(x->m_nSize)) > ((double)(y->GetVolumeComplete() ) / (double)(y->m_nSize)) )
+							bOK = TRUE;
+						else
+							bRlBk = FALSE;
+						break;
+					case DOWNLOAD_COLUMN_DATEADDED:
+						if (x->GetDateAddedInSeconds() > y->GetDateAddedInSeconds())
 							bOK = TRUE;
 						else
 							bRlBk = FALSE;

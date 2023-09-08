@@ -413,6 +413,11 @@ bool CDownload::IsShared() const
 		( Settings.BitTorrent.EnableToday && IsTorrent() && ( IsSeeding() || IsStarted() ) );
 }
 
+DWORD CDownload::GetDateAddedInSeconds() const
+{
+	return m_tAdded;
+}
+
 CString CDownload::GetDateAdded() const
 {
 	const ULONGLONG EPOCH_DIFFERENCE = 116444736000000000ULL;

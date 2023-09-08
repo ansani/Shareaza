@@ -89,6 +89,7 @@ public:
 	bool		IsShared() const;
 	CString		GetDownloadStatus() const;
 	CString		GetDateAdded() const;
+	DWORD		GetDateAddedInSeconds() const;
 	int			GetClientStatus() const;
 	CString		GetDownloadSources() const;
 	BOOL		Load(LPCTSTR pszPath);
