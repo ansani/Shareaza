@@ -21,7 +21,7 @@
 
 #pragma once
 
-#define DOWNLOAD_SER_VERSION	43
+#define DOWNLOAD_SER_VERSION	44
 // History:
 // 33 - added m_sSearchKeyword to CDownloadBase (CyberBob)
 // 34 - added m_bSeeding and m_sServingFileName to CDownloadWithTorrent (Rolandas)
@@ -34,6 +34,7 @@
 // 41 - added m_sName to CFragmentedFile (Ryo-oh-ki)
 // 42 - added m_bMetaIgnore to CDownloadSource (Ryo-oh-ki)
 // 43 - added m_pAddressIPv6 and m_pIPv6ServerAddress to CDownloadSource (ivan386)
+// 44 - added m_tAdded to CDownload (ansani)
 
 #include "DownloadWithExtras.h"
 
@@ -51,6 +52,7 @@ public:
 	BOOL		m_bExpanded;
 	BOOL		m_bSelected;
 	DWORD		m_tCompleted;
+	DWORD		m_tAdded;		// The time this download was added to the client queue
 	int			m_nRunCookie;
 	int			m_nGroupCookie;
 	QWORD		m_nStartFrom;
@@ -86,6 +88,8 @@ public:
 	bool		IsBoosted() const;
 	bool		IsShared() const;
 	CString		GetDownloadStatus() const;
+	CString		GetDateAdded() const;
+	DWORD		GetDateAddedInSeconds() const;
 	int			GetClientStatus() const;
 	CString		GetDownloadSources() const;
 	BOOL		Load(LPCTSTR pszPath);

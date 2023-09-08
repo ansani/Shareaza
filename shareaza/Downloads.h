@@ -53,6 +53,7 @@ public:
 	bool			m_bClosing;
 	QWORD			m_nComplete;				// The last complete size of incomplete downloads
 	QWORD			m_nTotal;					// The last total size of incomplete downloads
+	DWORD			m_tDateAdded;				// The time file was added in the downloads
 
 private:
 	CList< CDownload* >	m_pList;
