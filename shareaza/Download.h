@@ -43,116 +43,116 @@ class CDownload : public CDownloadWithExtras
 {
 // Construction
 public:
-	CDownload();
-	virtual ~CDownload();
+    CDownload();
+    virtual ~CDownload();
 
 // Attributes
 public:
-	DWORD		m_nSerID;
-	BOOL		m_bExpanded;
-	BOOL		m_bSelected;
-	DWORD		m_tCompleted;
-	DWORD		m_tAdded;		// The time this download was added to the client queue
-	int			m_nRunCookie;
-	int			m_nGroupCookie;
-	QWORD		m_nStartFrom;
+    DWORD		m_nSerID;
+    BOOL		m_bExpanded;
+    BOOL		m_bSelected;
+    DWORD		m_tCompleted;
+    DWORD		m_tAdded;		// The time this download was added to the client queue
+    int			m_nRunCookie;
+    int			m_nGroupCookie;
+    QWORD		m_nStartFrom;
 
 private:
-	BOOL		m_bTempPaused;
-	BOOL		m_bPaused;
-	BOOL		m_bBoosted;
-	BOOL		m_bShared;
-	bool		m_bComplete;
-	DWORD		m_tSaved;
-	DWORD		m_tBegan;		// The time when this download began trying to download (Started
-								// searching, etc). 0 means has not tried this session.
-	DWORD		m_tStartFromSet;
-	QWORD		m_nCompletedAtBegan;
-	bool		m_bDownloading;	// This is used to store if a download is downloading. (Performance tweak)
-								// You should count the transfers if you need a 100% current answer.
-	CDownloadTask	m_pTask;
-	bool		m_bStableName;	// Download has a stable name
+    BOOL		m_bTempPaused;
+    BOOL		m_bPaused;
+    BOOL		m_bBoosted;
+    BOOL		m_bShared;
+    bool		m_bComplete;
+    DWORD		m_tSaved;
+    DWORD		m_tBegan;		// The time when this download began trying to download (Started
+    // searching, etc). 0 means has not tried this session.
+    DWORD		m_tStartFromSet;
+    QWORD		m_nCompletedAtBegan;
+    bool		m_bDownloading;	// This is used to store if a download is downloading. (Performance tweak)
+    // You should count the transfers if you need a 100% current answer.
+    CDownloadTask	m_pTask;
+    bool		m_bStableName;	// Download has a stable name
 
 // Operations
 public:
-	bool		HasStableName() const;		// Download has a stable name
-	void		SetStableName(bool bStable = true);
+    bool		HasStableName() const;		// Download has a stable name
+    void		SetStableName(bool bStable = true);
 
-	void		Pause(BOOL bRealPause = TRUE);
-	void		Resume();
-	void		Remove();
-	void		Boost();
-	void		Share(BOOL bShared);
-	bool		IsStarted() const;		// Has the download actually downloaded anything?
-	bool		IsDownloading() const;	// Is the download receiving data?
-	bool		IsBoosted() const;
-	bool		IsShared() const;
-	CString		GetDownloadStatus() const;
-	CString		GetDateAdded() const;
-	DWORD		GetDateAddedInSeconds() const;
-	int			GetClientStatus() const;
-	CString		GetDownloadSources() const;
-	BOOL		Load(LPCTSTR pszPath);
-	BOOL		Save(BOOL bFlush = FALSE);
-	void		OnRun();
-	void		ForceComplete();
-	BOOL		Launch(int nIndex, CSingleLock* pLock, BOOL bForceOriginal);
-	BOOL		Enqueue(int nIndex, CSingleLock* pLock);
-	BOOL		OpenDownload();
-	BOOL		SeedTorrent();
-	BOOL		PrepareFile();
-	QWORD		GetRealSpeed();
-	QWORD		GetNonRandomEnd(bool bForce = FALSE);
-	void		SetStartFrom(QWORD nStartFrom = 0);
-	void		Allocate();
-	void		Copy();
-	void		PreviewRequest( LPCTSTR szURL);
-	void		MergeFile(CList< CString >* pFiles, BOOL bValidation = TRUE, const Fragments::List* pGaps = NULL);
+    void		Pause(BOOL bRealPause = TRUE);
+    void		Resume();
+    void		Remove();
+    void		Boost();
+    void		Share(BOOL bShared);
+    bool		IsStarted() const;		// Has the download actually downloaded anything?
+    bool		IsDownloading() const;	// Is the download receiving data?
+    bool		IsBoosted() const;
+    bool		IsShared() const;
+    CString		GetDownloadStatus() const;
+    CString		GetDateAdded() const;
+    DWORD		GetDateAddedInSeconds() const;
+    int			GetClientStatus() const;
+    CString		GetDownloadSources() const;
+    BOOL		Load(LPCTSTR pszPath);
+    BOOL		Save(BOOL bFlush = FALSE);
+    void		OnRun();
+    void		ForceComplete();
+    BOOL		Launch(int nIndex, CSingleLock* pLock, BOOL bForceOriginal);
+    BOOL		Enqueue(int nIndex, CSingleLock* pLock);
+    BOOL		OpenDownload();
+    BOOL		SeedTorrent();
+    BOOL		PrepareFile();
+    QWORD		GetRealSpeed();
+    QWORD		GetNonRandomEnd(bool bForce = FALSE);
+    void		SetStartFrom(QWORD nStartFrom = 0);
+    void		Allocate();
+    void		Copy();
+    void		PreviewRequest( LPCTSTR szURL);
+    void		MergeFile(CList< CString >* pFiles, BOOL bValidation = TRUE, const Fragments::List* pGaps = NULL);
 
 private:
-	void		StartTrying();
-	void		StopTrying();
-	DWORD		GetStartTimer() const;
-	void		OnDownloaded();
-	void		SerializeOld(CArchive& ar, int nVersion /* DOWNLOAD_SER_VERSION */);
+    void		StartTrying();
+    void		StopTrying();
+    DWORD		GetStartTimer() const;
+    void		OnDownloaded();
+    void		SerializeOld(CArchive& ar, int nVersion /* DOWNLOAD_SER_VERSION */);
 
-	// Cancel currently running task
-	void		AbortTask();
+    // Cancel currently running task
+    void		AbortTask();
 
 // Overrides
 public:
-	// Set download new size
-	virtual bool	Resize(QWORD nNewSize);
+    // Set download new size
+    virtual bool	Resize(QWORD nNewSize);
 
-	// Return currently running task
-	virtual dtask	GetTaskType() const;
+    // Return currently running task
+    virtual dtask	GetTaskType() const;
 
-	// Statistics
-	virtual float	GetProgress() const;
+    // Statistics
+    virtual float	GetProgress() const;
 
-	// Check if a task is already running
-	virtual bool	IsTasking() const;
+    // Check if a task is already running
+    virtual bool	IsTasking() const;
 
-	// Check if a task is already running and its a moving task
-	virtual bool	IsMoving() const;
+    // Check if a task is already running and its a moving task
+    virtual bool	IsMoving() const;
 
-	virtual bool	IsCompleted() const;
+    virtual bool	IsCompleted() const;
 
-	virtual bool	IsPaused(bool bRealState = false) const;
+    virtual bool	IsPaused(bool bRealState = false) const;
 
-	// Is the download currently trying to download?
-	virtual bool	IsTrying() const;
+    // Is the download currently trying to download?
+    virtual bool	IsTrying() const;
 
-	// File was moved to the Library
-	virtual void	OnMoved();
+    // File was moved to the Library
+    virtual void	OnMoved();
 
-	// File was hashed and verified in the Library
-	virtual BOOL	OnVerify(const CLibraryFile* pFile, TRISTATE bVerified);
+    // File was hashed and verified in the Library
+    virtual BOOL	OnVerify(const CLibraryFile* pFile, TRISTATE bVerified);
 
-	virtual void	Serialize(CArchive& ar, int nVersion /* DOWNLOAD_SER_VERSION */);
+    virtual void	Serialize(CArchive& ar, int nVersion /* DOWNLOAD_SER_VERSION */);
 
-	friend class CDownloadTransfer;		// GetVerifyLength
-	friend class CDownloadWithTorrent;	// m_bComplete
-	friend class CDownloadsWnd;			// m_pTask
-	friend class CDownloads;			// m_bComplete for Load()
+    friend class CDownloadTransfer;		// GetVerifyLength
+    friend class CDownloadWithTorrent;	// m_bComplete
+    friend class CDownloadsWnd;			// m_pTask
+    friend class CDownloads;			// m_bComplete for Load()
 };
