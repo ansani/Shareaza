@@ -36,23 +36,23 @@ static char THIS_FILE[]=__FILE__;
 // CTransfer construction
 
 CTransfer::CTransfer(PROTOCOLID nProtocol)
-	: CConnection		( nProtocol )
-	, m_pServer			( SOCKADDR_IN() )
-	, m_nRunCookie		( 0 )
-	, m_nState			( 0 )
-	, m_nBandwidth		( 0ul )
-	, m_nOffset			( SIZE_UNKNOWN )
-	, m_nLength			( SIZE_UNKNOWN )
-	, m_nPosition		( 0 )
-	, m_tRequest		( 0 )
+    : CConnection		( nProtocol )
+    , m_pServer			( SOCKADDR_IN() )
+    , m_nRunCookie		( 0 )
+    , m_nState			( 0 )
+    , m_nBandwidth		( 0ul )
+    , m_nOffset			( SIZE_UNKNOWN )
+    , m_nLength			( SIZE_UNKNOWN )
+    , m_nPosition		( 0 )
+    , m_tRequest		( 0 )
 {
-	m_pServer.sin_family = AF_INET;
+    m_pServer.sin_family = AF_INET;
 }
 
 CTransfer::~CTransfer()
 {
-	ASSERT( ! IsValid() );
-	if ( IsValid() ) Close();
+    ASSERT( ! IsValid() );
+    if ( IsValid() ) Close();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -60,66 +60,66 @@ CTransfer::~CTransfer()
 
 BOOL CTransfer::ConnectTo(const IN_ADDR* pAddress, WORD nPort)
 {
-	m_nState = 0;
+    m_nState = 0;
 
-	if ( CConnection::ConnectTo( pAddress, nPort ) )
-	{
-		Transfers.Add( this );
-		return TRUE;
-	}
+    if ( CConnection::ConnectTo( pAddress, nPort ) )
+    {
+        Transfers.Add( this );
+        return TRUE;
+    }
 
-	return FALSE;
+    return FALSE;
 }
 
 BOOL CTransfer::ConnectToIPv6(const IN6_ADDR* pAddress, WORD nPort)
 {
-	m_nState = 0;
+    m_nState = 0;
 
-	if ( CConnection::ConnectTo( pAddress, nPort ) )
-	{
-		Transfers.Add( this );
-		return TRUE;
-	}
+    if ( CConnection::ConnectTo( pAddress, nPort ) )
+    {
+        Transfers.Add( this );
+        return TRUE;
+    }
 
-	return FALSE;
+    return FALSE;
 }
 
 BOOL CTransfer::SSLConnectTo(const IN_ADDR* pAddress, WORD nPort)
 {
-	m_nState = 0;
+    m_nState = 0;
 
-	if (CConnection::SSLConnectTo(pAddress, nPort))
-	{
-		Transfers.Add(this);
-		return TRUE;
-	}
+    if (CConnection::SSLConnectTo(pAddress, nPort))
+    {
+        Transfers.Add(this);
+        return TRUE;
+    }
 
-	return FALSE;
+    return FALSE;
 }
 
 BOOL CTransfer::SSLConnectToIPv6(const IN6_ADDR* pAddress, WORD nPort)
 {
-	m_nState = 0;
+    m_nState = 0;
 
-	if (CConnection::SSLConnectTo(pAddress, nPort))
-	{
-		Transfers.Add(this);
-		return TRUE;
-	}
+    if (CConnection::SSLConnectTo(pAddress, nPort))
+    {
+        Transfers.Add(this);
+        return TRUE;
+    }
 
-	return FALSE;
+    return FALSE;
 }
 
 void CTransfer::AttachTo(CConnection* pConnection)
 {
-	CConnection::AttachTo( pConnection );
-	Transfers.Add( this );
+    CConnection::AttachTo( pConnection );
+    Transfers.Add( this );
 }
 
 void CTransfer::Close(UINT nError)
 {
-	Transfers.Remove( this );
-	CConnection::Close( nError );
+    Transfers.Remove( this );
+    CConnection::Close( nError );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -127,14 +127,14 @@ void CTransfer::Close(UINT nError)
 
 void CTransfer::ClearHeaders()
 {
-	m_pHeaderName.RemoveAll();
-	m_pHeaderValue.RemoveAll();
+    m_pHeaderName.RemoveAll();
+    m_pHeaderValue.RemoveAll();
 }
 
 BOOL CTransfer::OnHeaderLine(CString& strHeader, CString& strValue)
 {
-	m_pHeaderName.Add( strHeader );
-	m_pHeaderValue.Add( strValue );
+    m_pHeaderName.Add( strHeader );
+    m_pHeaderValue.Add( strValue );
 
-	return CConnection::OnHeaderLine( strHeader, strValue );
+    return CConnection::OnHeaderLine( strHeader, strValue );
 }

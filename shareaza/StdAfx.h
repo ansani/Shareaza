@@ -28,7 +28,7 @@
 
 // Set "1" for release and "0" for alpha, beta, etc. daily builds
 #ifndef RELEASE_BUILD
-	#define RELEASE_BUILD 0
+#define RELEASE_BUILD 0
 #endif
 
 //
@@ -247,37 +247,37 @@ typedef CAtlList< CString, CStringElementTraitsI< CString > > CStringIList;
 template<>
 AFX_INLINE UINT AFXAPI HashKey(const CStringW& key)
 {
-	UINT nHash = 0;
-	const wchar_t* pszKey = key;
-	for ( int nSize = key.GetLength(); nSize; ++pszKey, --nSize )
-	{
-		nHash = ( nHash << 5 ) + nHash + *pszKey;
-	}
-	return nHash;
+    UINT nHash = 0;
+    const wchar_t* pszKey = key;
+    for ( int nSize = key.GetLength(); nSize; ++pszKey, --nSize )
+    {
+        nHash = ( nHash << 5 ) + nHash + *pszKey;
+    }
+    return nHash;
 }
 
 template<>
 AFX_INLINE UINT AFXAPI HashKey(const CStringA& key)
 {
-	UINT nHash = 0;
-	const char* pszKey = key;
-	for ( int nSize = key.GetLength(); nSize; ++pszKey, --nSize )
-	{
-		nHash = ( nHash << 5 ) + nHash + *pszKey;
-	}
-	return nHash;
+    UINT nHash = 0;
+    const char* pszKey = key;
+    for ( int nSize = key.GetLength(); nSize; ++pszKey, --nSize )
+    {
+        nHash = ( nHash << 5 ) + nHash + *pszKey;
+    }
+    return nHash;
 }
 
 template<>
 AFX_INLINE BOOL AFXAPI CompareElements(const IN_ADDR* pElement1, const IN_ADDR* pElement2)
 {
-	return pElement1->s_addr == pElement2->s_addr;
+    return pElement1->s_addr == pElement2->s_addr;
 }
 
 template<>
 AFX_INLINE UINT AFXAPI HashKey(const IN_ADDR& key)
 {
-	return key.s_addr;
+    return key.s_addr;
 }
 
 #ifdef _WIN64
@@ -285,19 +285,19 @@ AFX_INLINE UINT AFXAPI HashKey(const IN_ADDR& key)
 template<>
 AFX_INLINE UINT AFXAPI HashKey( void* key )
 {
-	return HashKey< __int64 >( (__int64)key );
+    return HashKey< __int64 >( (__int64)key );
 }
 
 template<>
 AFX_INLINE UINT AFXAPI HashKey( HICON key )
 {
-	return HashKey< __int64 >( (__int64)key );
+    return HashKey< __int64 >( (__int64)key );
 }
 
 template<>
 AFX_INLINE UINT AFXAPI HashKey( LPUNKNOWN key )
 {
-	return HashKey< __int64 >( (__int64)key );
+    return HashKey< __int64 >( (__int64)key );
 }
 
 #endif // _WIN64
@@ -318,12 +318,12 @@ AFX_INLINE UINT AFXAPI HashKey( LPUNKNOWN key )
 //
 
 #ifdef _DEBUG
-	#undef GetRValue
-	#define GetRValue(rgb)      ((BYTE)( (rgb)        & 0xff))
-	#undef GetGValue
-	#define GetGValue(rgb)      ((BYTE)(((rgb) >>  8) & 0xff))
-	#undef GetBValue
-	#define GetBValue(rgb)      ((BYTE)(((rgb) >> 16) & 0xff))
+#undef GetRValue
+#define GetRValue(rgb)      ((BYTE)( (rgb)        & 0xff))
+#undef GetGValue
+#define GetGValue(rgb)      ((BYTE)(((rgb) >>  8) & 0xff))
+#undef GetBValue
+#define GetBValue(rgb)      ((BYTE)(((rgb) >> 16) & 0xff))
 #endif
 
 //
@@ -339,49 +339,49 @@ const QWORD SIZE_UNKNOWN = ~0ull;
 
 inline CArchive& AFXAPI operator<<(CArchive& ar, const TRISTATE& n)
 {
-	int tmp = static_cast< int >( n );
-	return ar << tmp;
+    int tmp = static_cast< int >( n );
+    return ar << tmp;
 }
 
 inline CArchive& AFXAPI operator>>(CArchive& ar, TRISTATE& n)
 {
-	int tmp;
-	ar >> tmp;
-	n = static_cast< TRISTATE >( tmp );
-	return ar;
+    int tmp;
+    ar >> tmp;
+    n = static_cast< TRISTATE >( tmp );
+    return ar;
 }
 
 #pragma pack( push, 1 )
 
 typedef struct _ICONDIRENTRY
 {
-	BYTE        bWidth;          // Width, in pixels, of the image
-	BYTE        bHeight;         // Height, in pixels, of the image
-	BYTE        bColorCount;     // Number of colors in image (0 if >=8bpp)
-	BYTE        bReserved;       // Reserved ( must be 0)
-	WORD        wPlanes;         // Color Planes
-	WORD        wBitCount;       // Bits per pixel
-	DWORD       dwBytesInRes;    // How many bytes in this resource?
-	DWORD       dwImageOffset;   // Where in the file is this image?
+    BYTE        bWidth;          // Width, in pixels, of the image
+    BYTE        bHeight;         // Height, in pixels, of the image
+    BYTE        bColorCount;     // Number of colors in image (0 if >=8bpp)
+    BYTE        bReserved;       // Reserved ( must be 0)
+    WORD        wPlanes;         // Color Planes
+    WORD        wBitCount;       // Bits per pixel
+    DWORD       dwBytesInRes;    // How many bytes in this resource?
+    DWORD       dwImageOffset;   // Where in the file is this image?
 } ICONDIRENTRY, *LPICONDIRENTRY;
 
 typedef struct _GRPICONDIRENTRY
 {
-	BYTE   bWidth;               // Width, in pixels, of the image
-	BYTE   bHeight;              // Height, in pixels, of the image
-	BYTE   bColorCount;          // Number of colors in image (0 if >=8bpp)
-	BYTE   bReserved;            // Reserved
-	WORD   wPlanes;              // Color Planes
-	WORD   wBitCount;            // Bits per pixel
-	DWORD  dwBytesInRes;         // how many bytes in this resource?
-	WORD   nID;                  // the ID
+    BYTE   bWidth;               // Width, in pixels, of the image
+    BYTE   bHeight;              // Height, in pixels, of the image
+    BYTE   bColorCount;          // Number of colors in image (0 if >=8bpp)
+    BYTE   bReserved;            // Reserved
+    WORD   wPlanes;              // Color Planes
+    WORD   wBitCount;            // Bits per pixel
+    DWORD  dwBytesInRes;         // how many bytes in this resource?
+    WORD   nID;                  // the ID
 } GRPICONDIRENTRY, *LPGRPICONDIRENTRY;
 
 typedef struct _ICONDIR
 {
-	WORD           idReserved;   // Reserved (must be 0)
-	WORD           idType;       // Resource Type (1 for icons)
-	WORD           idCount;      // How many images?
+    WORD           idReserved;   // Reserved (must be 0)
+    WORD           idType;       // Resource Type (1 for icons)
+    WORD           idCount;      // How many images?
 //	ICONDIRENTRY   idEntries[];  // An entry for each image (idCount of 'em)
 } ICONDIR, *LPICONDIR;
 
@@ -393,18 +393,18 @@ typedef struct _ICONDIR
 
 enum PROTOCOLID
 {
-	PROTOCOL_ANY  = -1,
-	PROTOCOL_NULL = 0,
-	PROTOCOL_G1   = 1,
-	PROTOCOL_G2   = 2,
-	PROTOCOL_ED2K = 3,
-	PROTOCOL_HTTP = 4,
-	PROTOCOL_FTP  = 5,
-	PROTOCOL_BT   = 6,
-	PROTOCOL_KAD  = 7,
-	PROTOCOL_DC   = 8,
-	PROTOCOL_LAST = 9,
-	PROTOCOL_SSL  = 10
+    PROTOCOL_ANY  = -1,
+    PROTOCOL_NULL = 0,
+    PROTOCOL_G1   = 1,
+    PROTOCOL_G2   = 2,
+    PROTOCOL_ED2K = 3,
+    PROTOCOL_HTTP = 4,
+    PROTOCOL_FTP  = 5,
+    PROTOCOL_BT   = 6,
+    PROTOCOL_KAD  = 7,
+    PROTOCOL_DC   = 8,
+    PROTOCOL_LAST = 9,
+    PROTOCOL_SSL  = 10
 };
 
 // Protocol full names
@@ -418,76 +418,80 @@ extern const WORD protocolPorts[];
 
 inline PROTOCOLID& operator++(PROTOCOLID& arg)
 {
-	ASSERT( arg < PROTOCOL_LAST );
-	arg = PROTOCOLID( arg + 1 );
-	return arg;
+    ASSERT( arg < PROTOCOL_LAST );
+    arg = PROTOCOLID( arg + 1 );
+    return arg;
 }
 
 inline PROTOCOLID& operator--(PROTOCOLID& arg)
 {
-	ASSERT( arg > PROTOCOL_ANY );
-	arg = PROTOCOLID( arg - 1 );
-	return arg;
+    ASSERT( arg > PROTOCOL_ANY );
+    arg = PROTOCOLID( arg - 1 );
+    return arg;
 }
 
 inline CArchive& operator<<(CArchive& ar, const PROTOCOLID& rhs)
 {
-	int value = rhs;
-	return ar << value;
+    int value = rhs;
+    return ar << value;
 }
 
 inline CArchive& operator>>(CArchive& ar, PROTOCOLID& rhs)
 {
-	int value;
-	ar >> value;
-	if ( !( value >= PROTOCOL_ANY && value < PROTOCOL_LAST ) )
-		AfxThrowUserException();
-	rhs = ( value >= PROTOCOL_ANY && value < PROTOCOL_LAST ) ?
-		PROTOCOLID( value ) : PROTOCOL_NULL;
-	return ar;
+    int value;
+    ar >> value;
+    if ( !( value >= PROTOCOL_ANY && value < PROTOCOL_LAST ) )
+        AfxThrowUserException();
+    rhs = ( value >= PROTOCOL_ANY && value < PROTOCOL_LAST ) ?
+          PROTOCOLID( value ) : PROTOCOL_NULL;
+    return ar;
 }
 
 
 class CQuickLock
 {
 public:
-	explicit CQuickLock(CSyncObject& oMutex) : m_oMutex( oMutex ) { oMutex.Lock(); }
-	~CQuickLock() { m_oMutex.Unlock(); }
+    explicit CQuickLock(CSyncObject& oMutex) : m_oMutex( oMutex ) {
+        oMutex.Lock();
+    }
+    ~CQuickLock() {
+        m_oMutex.Unlock();
+    }
 private:
-	CSyncObject& m_oMutex;
-	CQuickLock(const CQuickLock&);
-	CQuickLock& operator=(const CQuickLock&);
-	static void* operator new(std::size_t);
-	static void* operator new[](std::size_t);
-	static void operator delete(void*);
-	static void operator delete[](void*);
-	CQuickLock* operator&() const;
+    CSyncObject& m_oMutex;
+    CQuickLock(const CQuickLock&);
+    CQuickLock& operator=(const CQuickLock&);
+    static void* operator new(std::size_t);
+    static void* operator new[](std::size_t);
+    static void operator delete(void*);
+    static void operator delete[](void*);
+    CQuickLock* operator&() const;
 };
 
 template< class T >
 class CGuarded
 {
 public:
-	explicit CGuarded() : m_oSection(), m_oValue() { }
-	explicit CGuarded(const CGuarded& other) : m_oSection(), m_oValue( other ) { }
-	CGuarded(const T& oValue) : m_oSection(), m_oValue( oValue ) { }
-	CGuarded& operator=(const T& oValue)
-	{
-		CQuickLock oLock( m_oSection );
-		m_oValue = oValue;
-		return *this;
-	}
-	operator T() const
-	{
-		CQuickLock oLock( m_oSection );
-		return m_oValue;
-	}
+    explicit CGuarded() : m_oSection(), m_oValue() { }
+    explicit CGuarded(const CGuarded& other) : m_oSection(), m_oValue( other ) { }
+    CGuarded(const T& oValue) : m_oSection(), m_oValue( oValue ) { }
+    CGuarded& operator=(const T& oValue)
+    {
+        CQuickLock oLock( m_oSection );
+        m_oValue = oValue;
+        return *this;
+    }
+    operator T() const
+    {
+        CQuickLock oLock( m_oSection );
+        return m_oValue;
+    }
 private:
-	mutable CCriticalSection m_oSection;
-	T m_oValue;
+    mutable CCriticalSection m_oSection;
+    T m_oValue;
 
-	CGuarded* operator&() const; // too unsafe
-	CGuarded& operator=(const CGuarded&);
+    CGuarded* operator&() const; // too unsafe
+    CGuarded& operator=(const CGuarded&);
 };
 
 typedef boost::shared_ptr< CCriticalSection > CCriticalSectionPtr;
@@ -496,108 +500,108 @@ template< typename T, typename L >
 class CLocked
 {
 public:
-	CLocked(const CLocked& pGB) :
-		m_oValue( pGB.m_oValue ),
-		m_oLock( pGB.m_oLock )
-	{
-		m_oLock->Lock();
-	}
+    CLocked(const CLocked& pGB) :
+        m_oValue( pGB.m_oValue ),
+        m_oLock( pGB.m_oLock )
+    {
+        m_oLock->Lock();
+    }
 
-	CLocked(T oValue, L oLock) :
-		m_oValue( oValue ),
-		m_oLock( oLock )
-	{
-		m_oLock->Lock();
-	}
+    CLocked(T oValue, L oLock) :
+        m_oValue( oValue ),
+        m_oLock( oLock )
+    {
+        m_oLock->Lock();
+    }
 
-	~CLocked()
-	{
-		m_oLock->Unlock();
-	}
-	
-	operator T() const throw()
-	{
-		return m_oValue;
-	}
+    ~CLocked()
+    {
+        m_oLock->Unlock();
+    }
 
-	T operator->() const throw()
-	{
-		return m_oValue;
-	}
+    operator T() const throw()
+    {
+        return m_oValue;
+    }
+
+    T operator->() const throw()
+    {
+        return m_oValue;
+    }
 
 private:
-	T	m_oValue;
-	L	m_oLock;
+    T	m_oValue;
+    L	m_oLock;
 
-	CLocked* operator&() const;
-	CLocked& operator=(const CLocked&);
+    CLocked* operator&() const;
+    CLocked& operator=(const CLocked&);
 };
 
 #ifdef _DEBUG
 
-	// Assume we already entered to this lock
-	#define ASSUME_LOCK(lock) \
+// Assume we already entered to this lock
+#define ASSUME_LOCK(lock) \
 	if ( (lock).m_nEnterCount < 1 || (lock).m_nThreadId != (LONG)GetCurrentThreadId() ) { \
 		static char BUF[1024] = {}; \
 		strcpy_s(BUF,1024,THIS_FILE); \
 		strcat_s(BUF,1024,"\n\nThis code must be protected by " #lock "!"); \
 		if ( ::AfxAssertFailedLine(BUF, __LINE__) ) AfxDebugBreak(); }
 
-	// Assume we already entered to this lock only once
-	#define ASSUME_SINGLE_LOCK(lock) \
+// Assume we already entered to this lock only once
+#define ASSUME_SINGLE_LOCK(lock) \
 	if ( (lock).m_nEnterCount != 1 || (lock).m_nThreadId != (LONG)GetCurrentThreadId() ) { \
 		static char BUF[1024] = {}; \
 		strcpy_s(BUF,1024,THIS_FILE); \
 		strcat_s(BUF,1024,"\n\nThis code must be protected by " #lock "!"); \
 		if ( ::AfxAssertFailedLine(BUF, __LINE__) ) AfxDebugBreak(); }
 
-	class CMutexEx : public CMutex
-	{
-	public:
-		CMutexEx(BOOL bInitiallyOwn = FALSE, LPCTSTR lpszName = NULL, LPSECURITY_ATTRIBUTES lpsaAttribute = NULL)
-			: CMutex( bInitiallyOwn, lpszName, lpsaAttribute )
-			, m_nThreadId( 0 )
-			, m_nEnterCount( 0 )
-		{
-		}
+class CMutexEx : public CMutex
+{
+public:
+    CMutexEx(BOOL bInitiallyOwn = FALSE, LPCTSTR lpszName = NULL, LPSECURITY_ATTRIBUTES lpsaAttribute = NULL)
+        : CMutex( bInitiallyOwn, lpszName, lpsaAttribute )
+        , m_nThreadId( 0 )
+        , m_nEnterCount( 0 )
+    {
+    }
 
-		virtual BOOL Lock(DWORD dwTimeout = INFINITE)
-		{
-			if ( CMutex::Lock( dwTimeout ) )
-			{
-				InterlockedIncrement( &m_nEnterCount );
-				InterlockedCompareExchange( &m_nThreadId, (LONG)GetCurrentThreadId(), 0 );
-				return TRUE;
-			}
-			else
-				return FALSE;
-		}
+    virtual BOOL Lock(DWORD dwTimeout = INFINITE)
+    {
+        if ( CMutex::Lock( dwTimeout ) )
+        {
+            InterlockedIncrement( &m_nEnterCount );
+            InterlockedCompareExchange( &m_nThreadId, (LONG)GetCurrentThreadId(), 0 );
+            return TRUE;
+        }
+        else
+            return FALSE;
+    }
 
-		virtual BOOL Unlock()
-		{
-			if ( m_nThreadId && InterlockedDecrement( &m_nEnterCount ) == 0 )
-				InterlockedExchange( &m_nThreadId, 0 );
-			return CMutex::Unlock();
-		}
+    virtual BOOL Unlock()
+    {
+        if ( m_nThreadId && InterlockedDecrement( &m_nEnterCount ) == 0 )
+            InterlockedExchange( &m_nThreadId, 0 );
+        return CMutex::Unlock();
+    }
 
-		volatile LONG m_nThreadId;		// Owner thread
-		volatile LONG m_nEnterCount;	// Re-enter counter
+    volatile LONG m_nThreadId;		// Owner thread
+    volatile LONG m_nEnterCount;	// Re-enter counter
 
-	private:
-		CMutexEx(const CMutexEx&);
-		CMutexEx& operator=(const CMutexEx&);
-	};
+private:
+    CMutexEx(const CMutexEx&);
+    CMutexEx& operator=(const CMutexEx&);
+};
 
 #else	// _DEBUG
 
-	#define ASSUME_LOCK(lock) ((void)0)
-	#define ASSUME_SINGLE_LOCK(lock) ((void)0)
-	typedef CMutex CMutexEx;
+#define ASSUME_LOCK(lock) ((void)0)
+#define ASSUME_SINGLE_LOCK(lock) ((void)0)
+typedef CMutex CMutexEx;
 
 #endif	// _DEBUG
 
 #ifdef _DEBUG
-	#define VERIFY_FILE_ACCESS(h,f) \
+#define VERIFY_FILE_ACCESS(h,f) \
 	{ \
 		if ( ( h ) == INVALID_HANDLE_VALUE ) \
 		{ \
@@ -607,28 +611,28 @@ private:
 		} \
 	}
 #else
-	#define VERIFY_FILE_ACCESS(h,f) ((void)0);
+#define VERIFY_FILE_ACCESS(h,f) ((void)0);
 #endif
 
 template<>
 struct std::less< CLSID > : public std::binary_function< CLSID, CLSID, bool >
 {
-	inline bool operator()(const CLSID& _Left, const CLSID& _Right) const throw()
-	{
-		return _Left.Data1 < _Right.Data1 || ( _Left.Data1 == _Right.Data1 &&
-			( _Left.Data2 < _Right.Data2 || ( _Left.Data2 == _Right.Data2 &&
-			( _Left.Data3 < _Right.Data3 || ( _Left.Data3 == _Right.Data3 &&
-			( memcmp( _Left.Data4, _Right.Data4, 8 ) < 0 ) ) ) ) ) );
-	}
+    inline bool operator()(const CLSID& _Left, const CLSID& _Right) const throw()
+    {
+        return _Left.Data1 < _Right.Data1 || ( _Left.Data1 == _Right.Data1 &&
+                                               ( _Left.Data2 < _Right.Data2 || ( _Left.Data2 == _Right.Data2 &&
+                                                       ( _Left.Data3 < _Right.Data3 || ( _Left.Data3 == _Right.Data3 &&
+                                                               ( memcmp( _Left.Data4, _Right.Data4, 8 ) < 0 ) ) ) ) ) );
+    }
 };
 
 template<>
 struct std::less< CString > : public std::binary_function< CString, CString, bool>
 {
-	inline bool operator()(const CString& _Left, const CString& _Right) const throw()
-	{
-		return ( _Left.CompareNoCase( _Right ) < 0 );
-	}
+    inline bool operator()(const CString& _Left, const CString& _Right) const throw()
+    {
+        return ( _Left.CompareNoCase( _Right ) < 0 );
+    }
 };
 
 typedef std::set < CString > string_set;
@@ -637,10 +641,10 @@ typedef std::set < CString > string_set;
 
 inline UINT ReadArchive(CArchive& ar, void* lpBuf, const UINT nMax)
 {
-	UINT nReaded = ar.Read( lpBuf, nMax );
-	if ( nReaded != nMax )
-		AfxThrowArchiveException( CArchiveException::endOfFile );
-	return nReaded;
+    UINT nReaded = ar.Read( lpBuf, nMax );
+    if ( nReaded != nMax )
+        AfxThrowArchiveException( CArchiveException::endOfFile );
+    return nReaded;
 }
 
 // The GetMicroCount function retrieves the number of microseconds that have elapsed
@@ -655,99 +659,99 @@ template< class T, DWORD dwMilliseconds >
 class CTimeAverage
 {
 public:
-	CTimeAverage()
-	{
-	}
+    CTimeAverage()
+    {
+    }
 
-	inline T operator()(T Val)
-	{
-		// Add new value
-		DWORD dwNow = GetTickCount();
-		m_Data.push_back( CAveragePair( Val, dwNow ) );
+    inline T operator()(T Val)
+    {
+        // Add new value
+        DWORD dwNow = GetTickCount();
+        m_Data.push_back( CAveragePair( Val, dwNow ) );
 
-		// Remove outdated values
-		while ( m_Data.size() > 1 )
-		{
-			if ( dwNow - (*(++m_Data.begin())).second < dwMilliseconds )
-				break;
-			m_Data.pop_front();
-		}
+        // Remove outdated values
+        while ( m_Data.size() > 1 )
+        {
+            if ( dwNow - (*(++m_Data.begin())).second < dwMilliseconds )
+                break;
+            m_Data.pop_front();
+        }
 
-		// Calculate average
-		T sum = 0;
-		for ( CAverageList::const_iterator i = m_Data.begin(); i != m_Data.end(); ++i )
-			sum += (*i).first;
-		return sum / (T)m_Data.size();
-	}
+        // Calculate average
+        T sum = 0;
+        for ( CAverageList::const_iterator i = m_Data.begin(); i != m_Data.end(); ++i )
+            sum += (*i).first;
+        return sum / (T)m_Data.size();
+    }
 
 protected:
-	typedef std::pair< T, DWORD > CAveragePair;
-	typedef std::list< CAveragePair > CAverageList;
-	CAverageList m_Data;
+    typedef std::pair< T, DWORD > CAveragePair;
+    typedef std::list< CAveragePair > CAverageList;
+    CAverageList m_Data;
 
 private:
-	CTimeAverage(const CTimeAverage&);
-	CTimeAverage* operator&() const;
-	CTimeAverage& operator=(const CTimeAverage&);
+    CTimeAverage(const CTimeAverage&);
+    CTimeAverage* operator&() const;
+    CTimeAverage& operator=(const CTimeAverage&);
 };
 
 // Simple PROPVARIANT wrapper
 class CComPropVariant : public PROPVARIANT
 {
 public:
-	inline CComPropVariant()
-	{
-		::PropVariantInit( this );
-	}
+    inline CComPropVariant()
+    {
+        ::PropVariantInit( this );
+    }
 
-	inline ~CComPropVariant()
-	{
-		Clear();
-	}
+    inline ~CComPropVariant()
+    {
+        Clear();
+    }
 
-	inline HRESULT Clear()
-	{
-		return ::PropVariantClear( this );
-	}
+    inline HRESULT Clear()
+    {
+        return ::PropVariantClear( this );
+    }
 };
 
 template< class T >
 inline void SafeRelease(CComPtr< T >& pObj) throw()
 {
-	__try
-	{
-		pObj.Release();
-	}
-	__except( EXCEPTION_EXECUTE_HANDLER )
-	{
-		pObj.Detach();
-	}
+    __try
+    {
+        pObj.Release();
+    }
+    __except( EXCEPTION_EXECUTE_HANDLER )
+    {
+        pObj.Detach();
+    }
 }
 
 inline bool IsFileNewerThan(LPCTSTR pszFile, const QWORD nMilliseconds)
 {
-	WIN32_FILE_ATTRIBUTE_DATA fd = {};
-	if ( ! GetFileAttributesEx( pszFile, GetFileExInfoStandard, &fd ) )
-		return false;
+    WIN32_FILE_ATTRIBUTE_DATA fd = {};
+    if ( ! GetFileAttributesEx( pszFile, GetFileExInfoStandard, &fd ) )
+        return false;
 
-	FILETIME ftNow = {};
-	GetSystemTimeAsFileTime( &ftNow );
+    FILETIME ftNow = {};
+    GetSystemTimeAsFileTime( &ftNow );
 
-	if ( ( MAKEQWORD( ftNow.dwLowDateTime, ftNow.dwHighDateTime ) -
-		10000ull * nMilliseconds ) > MAKEQWORD( fd.ftLastWriteTime.dwLowDateTime,
-		fd.ftLastWriteTime.dwHighDateTime ) )
-		return false;
+    if ( ( MAKEQWORD( ftNow.dwLowDateTime, ftNow.dwHighDateTime ) -
+            10000ull * nMilliseconds ) > MAKEQWORD( fd.ftLastWriteTime.dwLowDateTime,
+                    fd.ftLastWriteTime.dwHighDateTime ) )
+        return false;
 
-	return true;
+    return true;
 }
 
 inline QWORD GetFileSize(LPCTSTR pszFile)
 {
-	WIN32_FILE_ATTRIBUTE_DATA fd = {};
-	if ( pszFile && pszFile[ 0 ] && GetFileAttributesEx( ( pszFile[ 0 ] == _T('\\') ) ? pszFile : ( CString( _T("\\\\?\\") ) + pszFile ), GetFileExInfoStandard, &fd ) )
-		return MAKEQWORD( fd.nFileSizeLow, fd.nFileSizeHigh );
-	else
-		return SIZE_UNKNOWN;
+    WIN32_FILE_ATTRIBUTE_DATA fd = {};
+    if ( pszFile && pszFile[ 0 ] && GetFileAttributesEx( ( pszFile[ 0 ] == _T('\\') ) ? pszFile : ( CString( _T("\\\\?\\") ) + pszFile ), GetFileExInfoStandard, &fd ) )
+        return MAKEQWORD( fd.nFileSizeLow, fd.nFileSizeHigh );
+    else
+        return SIZE_UNKNOWN;
 }
 
 // Powered version of AfxMessageBox()
