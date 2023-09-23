@@ -327,12 +327,12 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(RevisionSHA)' != ''">
     <ClCompile>
-        <AdditionalOptions>/DRevisionSHA=$(RevisionSHA) %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/DRevisionSHA=$(RevisionSHA) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(RevisionDate)' != ''">
     <ClCompile>
-        <AdditionalOptions>/DRevisionDate=$(RevisionDate) %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/DRevisionDate=$(RevisionDate) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -382,6 +382,7 @@
     <ClCompile Include="DownloadTransferED2K.cpp" />
     <ClCompile Include="DownloadTransferFTP.cpp" />
     <ClCompile Include="DownloadTransferHTTP.cpp" />
+    <ClCompile Include="DownloadTransferHTTPS.cpp" />
     <ClCompile Include="DownloadWithExtras.cpp" />
     <ClCompile Include="DownloadWithFile.cpp" />
     <ClCompile Include="DownloadWithSearch.cpp" />
@@ -1419,6 +1420,7 @@
     <Import Project="..\vc143\packages\boost_wserialization-vc143.1.80.0\build\boost_wserialization-vc143.targets" Condition="Exists('..\vc143\packages\boost_wserialization-vc143.1.80.0\build\boost_wserialization-vc143.targets')" />
     <Import Project="..\vc143\packages\boost_zlib-vc143.1.80.0\build\boost_zlib-vc143.targets" Condition="Exists('..\vc143\packages\boost_zlib-vc143.1.80.0\build\boost_zlib-vc143.targets')" />
     <Import Project="..\vc143\packages\boost-vc143.1.80.0\build\boost-vc143.targets" Condition="Exists('..\vc143\packages\boost-vc143.1.80.0\build\boost-vc143.targets')" />
+    <Import Project="..\vc143\packages\openssl-vc140-static-32_64.1.1.1.1\build\native\openssl-vc140-static-32_64.targets" Condition="Exists('..\vc143\packages\openssl-vc140-static-32_64.1.1.1.1\build\native\openssl-vc140-static-32_64.targets')" />
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
@@ -1473,5 +1475,6 @@
     <Error Condition="!Exists('..\vc143\packages\boost_wserialization-vc143.1.80.0\build\boost_wserialization-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\vc143\packages\boost_wserialization-vc143.1.80.0\build\boost_wserialization-vc143.targets'))" />
     <Error Condition="!Exists('..\vc143\packages\boost_zlib-vc143.1.80.0\build\boost_zlib-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\vc143\packages\boost_zlib-vc143.1.80.0\build\boost_zlib-vc143.targets'))" />
     <Error Condition="!Exists('..\vc143\packages\boost-vc143.1.80.0\build\boost-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\vc143\packages\boost-vc143.1.80.0\build\boost-vc143.targets'))" />
+    <Error Condition="!Exists('..\vc143\packages\openssl-vc140-static-32_64.1.1.1.1\build\native\openssl-vc140-static-32_64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\vc143\packages\openssl-vc140-static-32_64.1.1.1.1\build\native\openssl-vc140-static-32_64.targets'))" />
   </Target>
 </Project>

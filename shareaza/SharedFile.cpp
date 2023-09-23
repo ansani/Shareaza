@@ -935,6 +935,9 @@ CString CLibraryFile::GetAlternateSources(CList< CString >* pState, int nMaximum
 			if ( ( nProtocol == PROTOCOL_HTTP ) && ( _tcsncmp( pSource->m_sURL, _T("http://"), 7 ) != 0 ) )
 				continue;
 
+			if ((nProtocol == PROTOCOL_SSL) && (_tcsncmp(pSource->m_sURL, _T("https://"), 8) != 0))
+				continue;
+
 			if ( pState != NULL ) pState->AddTail( pSource->m_sURL );
 
 			if ( pSource->m_sURL.Find( _T("Zhttp://") ) >= 0 ||

@@ -1937,6 +1937,19 @@ void CNetwork::CloseSocket(SOCKET& hSocket, const bool bForce)
 	}
 }
 
+int CNetwork::SSLSend(SSL *s, const char* buf, int len)
+{
+	__try	// Fix against stupid firewalls like (iS3 Anti-Spyware or Norman Virus Control)
+	{
+		return SSL_write(s, buf, len);
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		return -1;
+	}
+}
+
+
 int CNetwork::Send(SOCKET s, const char* buf, int len)
 {
 	__try	// Fix against stupid firewalls like (iS3 Anti-Spyware or Norman Virus Control)
@@ -1984,6 +1997,19 @@ int CNetwork::Recv(SOCKET s, char* buf, int len)
 		return -1;
 	}
 }
+
+int CNetwork::SSLRecv(SSL* s, char* buf, int len)
+{
+	__try	// Fix against stupid firewalls like (iS3 Anti-Spyware or Norman Virus Control)
+	{
+		return SSL_read(s, buf, len);
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		return -1;
+	}
+}
+
 
 int CNetwork::RecvFrom(SOCKET s, char* buf, int len, SOCKADDR_IN* pFrom)
 {

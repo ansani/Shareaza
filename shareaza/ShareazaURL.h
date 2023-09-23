@@ -72,6 +72,8 @@ protected:
 	BOOL	ParseRoot(LPCTSTR pszURL, BOOL bResolve);
 	// http://[user[:password]@]host[:port]/[filepath], where {filepath} is a regular path or "/uri-res/N2R?hash"
 	BOOL	ParseHTTP(LPCTSTR pszURL, BOOL bResolve);
+	// https://[user[:password]@]host[:port]/[filepath], where {filepath} is a regular path or "/uri-res/N2R?hash"
+	BOOL	ParseHTTPS(LPCTSTR pszURL, BOOL bResolve);
 	// ftp://[user[:password]@]host[:port][/path]
 	BOOL	ParseFTP(LPCTSTR pszURL, BOOL bResolve);
 	// ed2kftp://[client_id@]address:port/{md4_hash}/{size}/

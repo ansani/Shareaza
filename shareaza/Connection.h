@@ -26,6 +26,14 @@
 
 #include "Buffer.h"
 #include "Packet.h"
+#define OPENSSL_NO_STDIO
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
+#pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib, "libssl.lib")
+#pragma comment(lib, "libcrypto.lib")
+
 
 
 // A socket connection to a remote computer on the Internet running peer-to-peer software
@@ -69,6 +77,7 @@ private:
 
 	CConnection(const CConnection&);
 	CConnection& operator=(const CConnection&);
+	SSL* sslConnection;
 
 public:
 	inline CLockedBuffer GetInput() const throw()
@@ -285,6 +294,8 @@ public:
 	virtual BOOL ConnectTo(const SOCKADDR_IN6* pHost);
 	virtual BOOL ConnectTo(const IN_ADDR* pAddress, WORD nPort);
 	virtual BOOL ConnectTo(const IN6_ADDR* pAddress, WORD nPort);
+	virtual BOOL SSLConnectTo(const IN_ADDR* pAddress, WORD nPort);
+	virtual BOOL SSLConnectTo(const IN6_ADDR* pAddress, WORD nPort);
 	virtual void AcceptFrom(SOCKET hSocket, SOCKADDR_IN* pHost); // Accept a connection from a remote computer
 	virtual void AcceptFrom(SOCKET hSocket, SOCKADDR_IN6* pHost); // Accept a connection from a remote computer
 	virtual void AttachTo(CConnection* pConnection);             // Copy a connection (do)
@@ -295,7 +306,9 @@ public:
 	virtual BOOL OnRun();                // (do) just returns true
 	virtual BOOL OnConnected();          // (do) just returns true
 	virtual BOOL OnRead();               // Read data waiting in the socket into the input buffer
+	virtual BOOL OnSSLRead();               // Read data waiting in the socket into the input buffer
 	virtual BOOL OnWrite();              // Move the contents of the output buffer into the socket
+	virtual BOOL OnSSLWrite();              // Move the contents of the output buffer into the socket
 	virtual void OnDropped(); 			 // (do) empty
 	virtual BOOL OnHeaderLine(CString& strHeader, CString& strValue); // Processes a single line from the headers
 	virtual BOOL OnHeadersComplete();    // (do) just returns true

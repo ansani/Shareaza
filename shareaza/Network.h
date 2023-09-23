@@ -23,6 +23,12 @@
 
 #include "ThreadImpl.h"
 #include "Settings.h"
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
+#pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib, "libssl.lib")
+#pragma comment(lib, "libcrypto.lib")
 
 class CBuffer;
 class CConnection;
@@ -260,11 +266,13 @@ public:
 	static void	CloseSocket(SOCKET& hSocket, const bool bForce);
 	// Safe way to send TCP data
 	static int Send(SOCKET s, const char* buf, int len);
+	static int SSLSend(SSL* s, const char* buf, int len);
 	// Safe way to send UDP data
 	static int SendTo(SOCKET s, const char* buf, int len, const SOCKADDR_IN* pTo);
 	static int SendTo(SOCKET s, const char* buf, int len, const SOCKADDR_IN6* pTo);
 	// Safe way to receive TCP data
 	static int Recv(SOCKET s, char* buf, int len);
+	static int SSLRecv(SSL* s, char* buf, int len);
 	// Safe way to receive UDP data
 	static int RecvFrom(SOCKET s, char* buf, int len, SOCKADDR_IN* pFrom);
 	static int RecvFrom(SOCKET s, char* buf, int len, SOCKADDR_IN6* pFrom);

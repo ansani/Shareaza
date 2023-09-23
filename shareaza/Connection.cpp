@@ -361,6 +361,227 @@ BOOL CConnection::ConnectTo(const IN6_ADDR* pAddress, WORD nPort)
 	return TRUE;
 }
 
+BOOL CConnection::SSLConnectTo(const IN_ADDR* pAddress, WORD nPort)
+{
+	// Make sure the socket isn't already connected somehow
+	if (IsValid())
+		return FALSE;
+
+	// Make sure we have an address and a nonzero port number
+	if (pAddress == NULL || nPort == 0)
+		return FALSE;
+
+	// S_un.S_addr is the IP as a single unsigned 4-byte long
+	if (pAddress->S_un.S_addr == 0)
+		return FALSE;
+
+	// The IP address is in the security list of government and corporate addresses we want to avoid
+	if (Security.IsDenied(pAddress))
+	{
+		// Report that we aren't connecting to this IP address and return false
+		theApp.Message(MSG_ERROR, IDS_SECURITY_OUTGOING, (LPCTSTR)CString(inet_ntoa(*pAddress)));
+		return FALSE;
+	}
+
+	// The IN_ADDR structure we just got passed isn't the same as the one already stored in this object
+	if (pAddress != &m_pHost.sin_addr)
+	{
+		// Zero the memory of the entire SOCKADDR_IN structure m_pHost, and then copy in the sin_addr part
+		ZeroMemory(&m_pHost, sizeof(m_pHost));
+		m_pHost.sin_addr = *pAddress;
+	}
+
+	// Fill in more parts of the m_pHost structure
+	m_pHost.sin_family = AF_INET;							// PF_INET means just normal IPv4, not IPv6 yet
+	m_pHost.sin_port = htons(nPort);					// Copy the port number into the m_pHost structure
+	m_sAddress = inet_ntoa(m_pHost.sin_addr);	// Save the IP address as a string of text
+	UpdateCountry();
+
+	// Create a socket and store it in m_hSocket
+	m_hSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (!IsValid())	// Now, make sure it has been created
+	{
+		theApp.Message(MSG_ERROR, _T("Failed to create socket. (1st Try)"));
+		// Second attempt
+		m_hSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+		if (!IsValid())
+		{
+			theApp.Message(MSG_ERROR, _T("Failed to create socket. (2nd Try)"));
+			return FALSE;
+		}
+	}
+
+	// Disables the Nagle algorithm for send coalescing
+	//VERIFY(setsockopt(m_hSocket, IPPROTO_TCP, TCP_NODELAY, "\x01", 1) == 0);
+
+	// Allows the socket to be bound to an address that is already in use
+	//VERIFY(setsockopt(m_hSocket, SOL_SOCKET, SO_REUSEADDR, "\x01", 1) == 0);
+
+	// Choose asynchronous, non-blocking reading and writing on our new socket
+	//DWORD dwValue = 1;
+	//ioctlsocket(m_hSocket, FIONBIO, &dwValue);
+
+	// If the OutHost string in connection settings has an IP address written in it
+	if (Settings.Connection.OutHost.GetLength())
+	{
+		// Read the text and copy the IP address and port into a new local MFC SOCKADDR_IN structure called pOutgoing
+		SOCKADDR_IN pOutgoing;
+		Network.Resolve(Settings.Connection.OutHost, 0, &pOutgoing);
+
+		// S_addr is the IP address as a single long number, if it's not zero
+		if (pOutgoing.sin_addr.S_un.S_addr)
+		{
+			// Call bind in Windows Sockets to associate the local address with the socket
+			bind(
+				m_hSocket,				// Our socket
+				(SOCKADDR*)&pOutgoing,	// The IP address this computer appears to have on the Internet (do)
+				sizeof(SOCKADDR_IN));	// Tell bind how many bytes it can read at the pointer
+		}
+	}
+
+	DestroyBuffers();
+
+	// Try to connect to the remote computer
+	if (WSAConnect(
+		m_hSocket,					// Our socket
+		(SOCKADDR*)&m_pHost,		// The remote IP address and port number
+		sizeof(SOCKADDR_IN),		// How many bytes the function can read
+		NULL, NULL, NULL, NULL))	// No advanced features
+	{
+		// If no error occurs, WSAConnect returns 0, so if we're here an error happened
+		int nError = WSAGetLastError(); // Get the last Windows Sockets error number
+
+		// An error of "would block" is normal because connections can't be made instantly and this is a non-blocking socket
+		if (nError != WSAEWOULDBLOCK)
+		{
+			CNetwork::CloseSocket(m_hSocket, true);
+
+			if (nError != 0)
+				Statistics.Current.Connections.Errors++;
+
+			return FALSE;
+		}
+	}
+
+	// Initialize OpenSSL
+	theApp.Message(MSG_INFO, _T("Creating SSL context"));
+	
+	// Initialize OpenSSL
+	SSL_library_init();
+	SSL_load_error_strings();
+	const SSL_METHOD* method = TLS_client_method();
+	SSL_CTX* ctx = SSL_CTX_new(method);
+
+	// Create an SSL structure for the connection
+	sslConnection = SSL_new(ctx);
+	SSL_set_fd(sslConnection, (int)m_hSocket);
+
+	// Perform the SSL/TLS handshake
+	if (SSL_connect(sslConnection) != 1) {
+		theApp.Message(MSG_ERROR, _T("SSL_connect failed"));
+		CNetwork::CloseSocket(m_hSocket, true);
+		return FALSE;
+	}
+	
+	theApp.Message(MSG_INFO, _T("SSL context created"));
+
+	CreateBuffers();
+
+	// Record that we initiated this connection, and when it happened
+	m_bInitiated = TRUE;
+	m_tConnected = GetTickCount();
+
+	// Record one more outgoing connection in the statistics
+	Statistics.Current.Connections.Outgoing++;
+
+	// The connection was successfully attempted
+	return TRUE;
+}
+
+BOOL CConnection::SSLConnectTo(const IN6_ADDR* pAddress, WORD nPort)
+{
+	//TODO: make it ready for IPV6
+	if (IsValid())
+		return FALSE;
+
+	// Make sure we have an address and a nonzero port number
+	if (pAddress == NULL || nPort == 0)
+		return FALSE;
+
+	// The IN_ADDR structure we just got passed isn't the same as the one already stored in this object
+	if (pAddress != &m_pHostIPv6.sin6_addr)
+	{
+		// Zero the memory of the entire SOCKADDR_IN structure m_pHost, and then copy in the sin_addr part
+		ZeroMemory(&m_pHostIPv6, sizeof(m_pHostIPv6));
+		m_pHostIPv6.sin6_addr = *pAddress;
+	}
+
+	// Fill in more parts of the m_pHost structure
+	m_pHostIPv6.sin6_family = AF_INET6;							// AF_INET6 means just normal IPv6
+	m_pHostIPv6.sin6_port = htons(nPort);					// Copy the port number into the m_pHost structure
+	m_sAddress = IPv6ToString(&m_pHostIPv6.sin6_addr);	// Save the IP address as a string of text
+
+	// Create a socket and store it in m_hSocket
+	m_hSocket = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
+	if (!IsValid())	// Now, make sure it has been created
+	{
+		theApp.Message(MSG_ERROR, _T("Failed to create socket. (1st Try)"));
+		// Second attempt
+		m_hSocket = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
+		if (!IsValid())
+		{
+			theApp.Message(MSG_ERROR, _T("Failed to create socket. (2nd Try)"));
+			return FALSE;
+		}
+	}
+
+	// Disables the Nagle algorithm for send coalescing
+	//VERIFY( setsockopt( m_hSocket, IPPROTO_TCP, TCP_NODELAY, "\x01", 1 ) == 0 );
+
+	// Allows the socket to be bound to an address that is already in use
+	VERIFY(setsockopt(m_hSocket, SOL_SOCKET, SO_REUSEADDR, "\x01", 1) == 0);
+
+	// Choose asynchronous, non-blocking reading and writing on our new socket
+	DWORD dwValue = 1;
+	ioctlsocket(m_hSocket, FIONBIO, &dwValue);
+
+	DestroyBuffers();
+
+	// Try to connect to the remote computer
+	if (WSAConnect(
+		m_hSocket,					// Our socket
+		(SOCKADDR*)&m_pHostIPv6,		// The remote IP address and port number
+		sizeof(SOCKADDR_IN6),		// How many bytes the function can read
+		NULL, NULL, NULL, NULL))	// No advanced features
+	{
+		// If no error occurs, WSAConnect returns 0, so if we're here an error happened
+		int nError = WSAGetLastError(); // Get the last Windows Sockets error number
+
+		// An error of "would block" is normal because connections can't be made instantly and this is a non-blocking socket
+		if (nError != WSAEWOULDBLOCK)
+		{
+			CNetwork::CloseSocket(m_hSocket, true);
+
+			if (nError != 0)
+				Statistics.Current.Connections.Errors++;
+
+			return FALSE;
+		}
+	}
+
+	CreateBuffers();
+
+	// Record that we initiated this connection, and when it happened
+	m_bInitiated = TRUE;
+	m_tConnected = GetTickCount();
+
+	// Record one more outgoing connection in the statistics
+	Statistics.Current.Connections.Outgoing++;
+
+	// The connection was successfully attempted
+	return TRUE;
+}
+
 //////////////////////////////////////////////////////////////////////
 // CConnection accept an incoming connection
 
@@ -680,6 +901,74 @@ BOOL CConnection::OnRead()
 	return TRUE;
 }
 
+BOOL CConnection::OnSSLRead()
+{
+	CQuickLock oInputLock(*m_pInputSection);
+
+	// Make sure the socket is valid
+	if (!IsValid())
+		return FALSE;
+
+	if (m_nDelayCloseReason)
+		return TRUE;
+
+	DWORD tNow = GetTickCount();	// The time right now
+	DWORD nLimit = ~0ul;				// Make the limit huge
+
+	// If we need to worry about throttling bandwidth, calculate nLimit, the number of bytes we are allowed to read now
+	if (m_mInput.pLimit							// If there is a limit
+		&& *m_mInput.pLimit							// And that limit isn't 0
+		&& Settings.Live.BandwidthScale <= 100)	// And the bandwidth scale isn't at MAX
+	{
+		// Work out what the bandwidth limit is
+		nLimit = m_mInput.CalculateLimit(tNow);
+	}
+
+	nLimit = min(nLimit, (DWORD)INT_MAX);
+
+	// Start the total at 0
+	DWORD nTotal = 0ul;
+
+	// Read bytes from the socket until the limit has run out
+	while (nLimit)
+	{
+		// Limit nLength to the free buffer space or the maximum size of an int
+		DWORD nLength = m_pInput->GetBufferFree();
+
+		if (nLength)
+			// Limit nLength to the speed limit
+			nLength = min(nLimit, nLength);
+		else
+			// Limit nLength to the maximum receive size
+			nLength = min(nLimit, 16384ul);	// Receive up to 16KB blocks from the socket
+
+		// Exit loop if the buffer isn't big enough to hold the data
+		if (!m_pInput->EnsureBuffer(nLength))
+			break;
+
+		// Read the bytes from the socket and record how many are actually read
+		int nRead = CNetwork::SSLRecv(sslConnection, (char*)m_pInput->GetDataEnd(), (int)nLength);
+
+		// Exit loop if nothing is left or an error occurs
+		if (nRead <= 0)
+			break;
+
+		m_pInput->m_nLength += nRead;	// Add to the buffer size
+		nTotal += nRead;	// Add to the total
+		nLimit -= nRead;	// Adjust the limit
+	}
+
+	// Add the total to the statistics
+	Statistics.Current.Bandwidth.Incoming += nTotal;
+
+	// If some bytes were read, add # bytes to bandwidth meter
+	if (nTotal) m_mInput.Add(nTotal, tNow);
+
+	// Report success
+	return TRUE;
+}
+
+
 //////////////////////////////////////////////////////////////////////
 // CConnection write event handler
 
@@ -743,6 +1032,67 @@ BOOL CConnection::OnWrite()
 	// Report success
 	return TRUE;
 }
+
+BOOL CConnection::OnSSLWrite()
+{
+	CQuickLock oOutputLock(*m_pOutputSection);
+
+	// Make sure the socket is valid
+	if (!IsValid())
+		return FALSE;
+
+	// If there is nothing to send, we succeed without doing anything
+	if (m_pOutput->m_nLength == 0)
+		return TRUE;
+
+	DWORD tNow = GetTickCount();	// The time right now
+	DWORD nLimit = ~0ul;				// Make the limit huge
+
+	// If we need to worry about throttling bandwidth, calculate nLimit, the number of bytes we are allowed to write now
+	if (m_mOutput.pLimit							// If there is a limit
+		&& *m_mOutput.pLimit						// And that limit isn't 0
+		&& Settings.Live.BandwidthScale <= 100)	// And the bandwidth scale isn't at MAX
+	{
+		// Work out what the bandwidth limit is
+		nLimit = m_mOutput.CalculateLimit(tNow, Settings.Uploads.ThrottleMode == 0);
+	}
+
+	nLimit = min(min(nLimit, m_pOutput->GetCount()), (DWORD)INT_MAX);
+
+	// Point to the data to write
+	const BYTE* pData = m_pOutput->GetData();
+
+	// Start the total at 0
+	DWORD nTotal = 0ul;
+
+	// Write bytes to the socket until our limit has run out
+	while (nLimit)
+	{
+		// Send the bytes to the socket and record how many are actually sent
+		int nSend = CNetwork::SSLSend(sslConnection, (const char*)pData, (int)nLimit);
+
+		// Exit loop if nothing is left or an error occurs
+		if (nSend <= 0)
+			break;
+
+		pData += nSend;	// Move forward past the sent data
+		nTotal += nSend;	// Add to the total
+		nLimit -= nSend;	// Adjust the limit
+	}
+
+	// Remove sent bytes from the buffer
+	m_pOutput->Remove(nTotal);
+
+	// Add the total to statistics
+	Statistics.Current.Bandwidth.Outgoing += nTotal;
+
+	// If some bytes were sent, add # bytes to bandwidth meter
+	if (nTotal) m_mOutput.Add(nTotal, tNow);
+
+	// Report success
+	return TRUE;
+}
+
 
 //////////////////////////////////////////////////////////////////////
 // CConnection measure
