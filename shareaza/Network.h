@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include "ThreadImpl.h"
 #include "Settings.h"
-#include <openssl/ssl.h>
+#include "ThreadImpl.h"
 #include <openssl/err.h>
+#include <openssl/ssl.h>
 
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "libssl.lib")
@@ -43,257 +43,267 @@ class CQuerySearch;
 class CRouteCache;
 class CUPnP;
 
-
 enum // It is used from CNetwork::IsFirewalled
 {
-    CHECK_BOTH, CHECK_TCP, CHECK_UDP, CHECK_IP, CHECK_TCP6, CHECK_UDP6, CHECK_IP6
+  CHECK_BOTH,
+  CHECK_TCP,
+  CHECK_UDP,
+  CHECK_IP,
+  CHECK_TCP6,
+  CHECK_UDP6,
+  CHECK_IP6
 };
 
 enum // AsyncResolver command
 {
-    RESOLVE_ONLY,				// Resolve and update host cache
-    RESOLVE_CONNECT_ULTRAPEER,	// Resolve, update host cache and connect as ultrapeer
-    RESOLVE_CONNECT,			// Resolve, update host cache and connect
-    RESOLVE_DISCOVERY			// Resolve and update discovery services
+  RESOLVE_ONLY,              // Resolve and update host cache
+  RESOLVE_CONNECT_ULTRAPEER, // Resolve, update host cache and connect as
+                             // ultrapeer
+  RESOLVE_CONNECT,           // Resolve, update host cache and connect
+  RESOLVE_DISCOVERY          // Resolve and update discovery services
 };
 
-class CNetwork : public CThreadImpl
-{
+class CNetwork : public CThreadImpl {
 public:
-    CNetwork();
-    ~CNetwork();
+  CNetwork();
+  ~CNetwork();
 
-// Attributes
+  // Attributes
 public:
-    CAutoPtr< CRouteCache >	NodeRoute;
-    CAutoPtr< CRouteCache >	QueryRoute;
-    CAutoPtr< CQueryKeys >	QueryKeys;
-    CAutoPtr< CUPnP >		UPnPFinder;			// UPnP
-    CAutoPtr< CFirewall >	Firewall;			// Windows Firewall
+  CAutoPtr<CRouteCache> NodeRoute;
+  CAutoPtr<CRouteCache> QueryRoute;
+  CAutoPtr<CQueryKeys> QueryKeys;
+  CAutoPtr<CUPnP> UPnPFinder;   // UPnP
+  CAutoPtr<CFirewall> Firewall; // Windows Firewall
 
-    CMutexEx		m_pSection;
-    SOCKADDR_IN		m_pHost;					// Structure (Windows Sockets) which holds address of the local machine
-    SOCKADDR_IN6	m_pHostIPv6;				// Structure (Windows Sockets) which holds address of the local machine
+  CMutexEx m_pSection;
+  SOCKADDR_IN m_pHost; // Structure (Windows Sockets) which holds address of the
+                       // local machine
+  SOCKADDR_IN6 m_pHostIPv6; // Structure (Windows Sockets) which holds address
+                            // of the local machine
 
-    BOOL			m_bAutoConnect;
-    volatile bool	m_bConnected;				// Network has finished initializing and is connected
-    DWORD			m_tStartedConnecting;		// The time Shareaza started trying to connect
-    TRISTATE		m_bUPnPPortsForwarded;		// UPnP values are assigned when the discovery is complete
+  BOOL m_bAutoConnect;
+  volatile bool
+      m_bConnected; // Network has finished initializing and is connected
+  DWORD m_tStartedConnecting;     // The time Shareaza started trying to connect
+  TRISTATE m_bUPnPPortsForwarded; // UPnP values are assigned when the discovery
+                                  // is complete
 
 protected:
-    CStringA		m_sHostName;
-    mutable CCriticalSection	m_pHASection;
-    CList< ULONG >	m_pHostAddresses;
+  CStringA m_sHostName;
+  mutable CCriticalSection m_pHASection;
+  CList<ULONG> m_pHostAddresses;
 
-    struct ipv6_compare {
-        inline bool operator()(const IN6_ADDR& _Left, const IN6_ADDR& _Right) const throw()
-        {
-            return ( memcmp( &_Left, &_Right, sizeof( IN6_ADDR ) ) > 0 );
-        }
+  struct ipv6_compare {
+    inline bool operator()(const IN6_ADDR &_Left, const IN6_ADDR &_Right) const
+        throw() {
+      return (memcmp(&_Left, &_Right, sizeof(IN6_ADDR)) > 0);
+    }
+  };
+
+  typedef std::set<IN6_ADDR, ipv6_compare> ipv6_set;
+  ipv6_set m_pHostAddressesIPv6;
+
+  DWORD m_nUPnPTier;      // UPnP tier number (0..UPNP_MAX)
+  DWORD m_tUPnPMap;       // Time of last UPnP port mapping
+  BOOL m_bHomeNetworkNAT; // Home network NAT> LAN NAT> Internet
+
+  typedef struct {
+    CString m_sAddress;
+    PROTOCOLID m_nProtocol;
+    WORD m_nPort;
+    BYTE m_nCommand;
+    union {
+      char m_pBuffer[MAXGETHOSTSTRUCT];
+      HOSTENT m_pHost;
     };
+  } ResolveStruct;
 
-    typedef std::set< IN6_ADDR, ipv6_compare > ipv6_set;
-    ipv6_set m_pHostAddressesIPv6;
+  typedef CMap<HANDLE, HANDLE, ResolveStruct *, ResolveStruct *> CResolveMap;
 
-    DWORD			m_nUPnPTier;				// UPnP tier number (0..UPNP_MAX)
-    DWORD			m_tUPnPMap;					// Time of last UPnP port mapping
-    BOOL			m_bHomeNetworkNAT;				// Home network NAT> LAN NAT> Internet
+  CResolveMap m_pLookups;
+  mutable CCriticalSection m_pLookupsSection;
 
-    typedef struct
-    {
-        CString		m_sAddress;
-        PROTOCOLID	m_nProtocol;
-        WORD		m_nPort;
-        BYTE		m_nCommand;
-        union
-        {
-            char	m_pBuffer[ MAXGETHOSTSTRUCT ];
-            HOSTENT	m_pHost;
-        };
-    } ResolveStruct;
+  class CJob {
+  public:
+    enum JobType { Null, Hit, Search };
 
-    typedef CMap< HANDLE, HANDLE, ResolveStruct*, ResolveStruct* > CResolveMap;
+    CJob(JobType nType = Null, void *pData = NULL, int nStage = 0)
+        : m_nType(nType), m_pData(pData), m_nStage(nStage) {}
 
-    CResolveMap					m_pLookups;
-    mutable CCriticalSection	m_pLookupsSection;
+    CJob(const CJob &oJob)
+        : m_nType(oJob.m_nType), m_pData(oJob.m_pData),
+          m_nStage(oJob.m_nStage) {}
 
-    class CJob
-    {
-    public:
-        enum JobType { Null, Hit, Search };
+    CJob &operator=(const CJob &oJob) {
+      m_nType = oJob.m_nType;
+      m_pData = oJob.m_pData;
+      m_nStage = oJob.m_nStage;
+      return *this;
+    }
 
-        CJob(JobType nType = Null, void* pData = NULL, int nStage = 0)
-            : m_nType( nType )
-            , m_pData( pData )
-            , m_nStage( nStage )
-        {
-        }
+    void Next() { ++m_nStage; }
 
-        CJob(const CJob& oJob)
-            : m_nType( oJob.m_nType )
-            , m_pData( oJob.m_pData )
-            , m_nStage( oJob.m_nStage )
-        {
-        }
+    JobType GetType() const { return m_nType; }
 
-        CJob& operator=(const CJob& oJob)
-        {
-            m_nType = oJob.m_nType;
-            m_pData = oJob.m_pData;
-            m_nStage = oJob.m_nStage;
-            return *this;
-        }
+    void *GetData() const { return m_pData; }
 
-        void Next()
-        {
-            ++ m_nStage;
-        }
+    int GetStage() const { return m_nStage; }
 
-        JobType GetType() const
-        {
-            return m_nType;
-        }
+  protected:
+    JobType m_nType;
+    void *m_pData;
+    int m_nStage;
+  };
+  CCriticalSection m_pJobSection; // m_oJobs synchronization
+  CList<CJob> m_oJobs;
 
-        void* GetData() const
-        {
-            return m_pData;
-        }
+  // Process asynchronous jobs (hits, searches, etc.)
+  void RunJobs();
+  void ClearJobs();
 
-        int GetStage() const
-        {
-            return m_nStage;
-        }
+  // Handle and destroy query searches
+  bool ProcessQuerySearch(CNetwork::CJob &oJob);
 
-    protected:
-        JobType	m_nType;
-        void*	m_pData;
-        int		m_nStage;
-    };
-    CCriticalSection	m_pJobSection;	// m_oJobs synchronization
-    CList< CJob >		m_oJobs;
+  // Handle and destroy query hits
+  bool ProcessQueryHits(CNetwork::CJob &oJob);
 
-    // Process asynchronous jobs (hits, searches, etc.)
-    void		RunJobs();
-    void		ClearJobs();
+  // Get asynchronously resolved host
+  ResolveStruct *GetResolve(HANDLE hAsync);
 
-    // Handle and destroy query searches
-    bool		ProcessQuerySearch(CNetwork::CJob& oJob);
+  // Clear asynchronous resolver queue
+  void ClearResolve();
 
-    // Handle and destroy query hits
-    bool		ProcessQueryHits(CNetwork::CJob& oJob);
+  // Restore WinINet connection to Internet
+  bool InternetConnect();
 
-    // Get asynchronously resolved host
-    ResolveStruct* GetResolve(HANDLE hAsync);
+  bool PreRun();
+  void OnRun();
+  void PostRun();
 
-    // Clear asynchronous resolver queue
-    void		ClearResolve();
-
-    // Restore WinINet connection to Internet
-    bool		InternetConnect();
-
-    bool		PreRun();
-    void		OnRun();
-    void		PostRun();
-
-// Operations
+  // Operations
 public:
-    // Initialize network: Windows Sockets, Windows Firewall, UPnP NAT.
-    BOOL		Init();
-    // Shutdown network
-    void		Clear();
-    BOOL		IsSelfIP(const IN_ADDR& nAddress) const;
-    BOOL		IsSelfIP(const IN6_ADDR& nAddress) const;
-    bool		IsAvailable() const;
-    bool		IsConnected() const;
-    bool		IsListening() const;
-    bool		IsListeningIPv6() const;
-    bool		IsWellConnected() const;
-    bool		IsStable() const;
-    bool		IsStableIPv6() const;
-    BOOL		IsFirewalled(int nCheck = CHECK_UDP) const;
-    DWORD		GetStableTime() const;
-    BOOL		IsConnectedTo(const IN_ADDR* pAddress) const;
-    BOOL		IsConnectedTo(const IN6_ADDR* pAddress) const;
-    BOOL		ReadyToTransfer(DWORD tNow) const;		// Are we ready to start downloading?
+  // Initialize network: Windows Sockets, Windows Firewall, UPnP NAT.
+  BOOL Init();
+  // Shutdown network
+  void Clear();
+  BOOL IsSelfIP(const IN_ADDR &nAddress) const;
+  BOOL IsSelfIP(const IN6_ADDR &nAddress) const;
+  bool IsAvailable() const;
+  bool IsConnected() const;
+  bool IsListening() const;
+  bool IsListeningIPv6() const;
+  bool IsWellConnected() const;
+  bool IsStable() const;
+  bool IsStableIPv6() const;
+  BOOL IsFirewalled(int nCheck = CHECK_UDP) const;
+  DWORD GetStableTime() const;
+  BOOL IsConnectedTo(const IN_ADDR *pAddress) const;
+  BOOL IsConnectedTo(const IN6_ADDR *pAddress) const;
+  BOOL ReadyToTransfer(DWORD tNow) const; // Are we ready to start downloading?
 
-    BOOL		Connect(BOOL bAutoConnect = FALSE);
-    void		Disconnect();
-    BOOL		ConnectTo(LPCTSTR pszAddress, int nPort = 0, PROTOCOLID nProtocol = PROTOCOL_NULL, BOOL bNoUltraPeer = FALSE);
-    BOOL		AcquireLocalAddress(SOCKET hSocket, bool bPort = false, const IN_ADDR* pFromAddress = NULL, const IN6_ADDR* pFromIPv6Address = NULL);
-    BOOL		AcquireLocalAddress(LPCTSTR pszHeader, WORD nPort = 0, const IN_ADDR* pFromAddress = NULL, const IN6_ADDR* pFromIPv6Address = NULL);
-    BOOL		AcquireLocalAddress(const IN_ADDR& pAddress, WORD nPort = 0, const IN_ADDR* pFromAddress = NULL);
-    BOOL		AcquireLocalAddress(const IN6_ADDR& pAddress, WORD nPort = 0, const IN6_ADDR* pFromAddress = NULL);
-    static BOOL	Resolve(LPCTSTR pszHost, int nPort, SOCKADDR_IN* pHost, BOOL bNames = TRUE);
-    BOOL		AsyncResolve(LPCTSTR pszAddress, WORD nPort, PROTOCOLID nProtocol, BYTE nCommand);
-    // Pending network name resolves queue size
-    UINT		GetResolveCount() const;
-    BOOL		IsReserved(const IN_ADDR* pAddress) const;
-    BOOL		IsReserved(const IN6_ADDR* pAddress) const;
-    WORD		RandomPort() const;
-    void		CreateID(Hashes::Guid& oID);
-    BOOL		IsFirewalledAddress(const IN_ADDR* pAddress, BOOL bIncludeSelf = FALSE, BOOL bIgnoreLocalIP = Settings.Connection.IgnoreLocalIP) const;
-    BOOL		IsFirewalledAddress(const IN6_ADDR* pAddress, BOOL bIncludeSelf = FALSE, BOOL bIgnoreLocalIP = Settings.Connection.IgnoreLocalIP) const;
-    BOOL		IsValidAddressFor(const IN_ADDR* pForAddress, const IN_ADDR* pAddress) const;
-    BOOL		IsValidAddressFor(const IN6_ADDR* pForAddress, const IN6_ADDR* pAddress) const;
-    BOOL		IsHomeNetwork(const IN_ADDR* pAddress) const;
-    BOOL		IsLocalAreaNetwork(const IN_ADDR* pAddress) const;
-    int			GetNetworkLevel(const IN_ADDR* pAddress) const;
-    int			GetNetworkLevel(const IN6_ADDR* pAddress) const;
-    IN_ADDR		GetMyAddressFor(const IN_ADDR* pAddress) const;
-    IN6_ADDR	GetMyAddressFor(const IN6_ADDR* pAddress) const;
-    WORD		GetPort() const;
+  BOOL Connect(BOOL bAutoConnect = FALSE);
+  void Disconnect();
+  BOOL ConnectTo(LPCTSTR pszAddress, int nPort = 0,
+                 PROTOCOLID nProtocol = PROTOCOL_NULL,
+                 BOOL bNoUltraPeer = FALSE);
+  BOOL AcquireLocalAddress(SOCKET hSocket, bool bPort = false,
+                           const IN_ADDR *pFromAddress = NULL,
+                           const IN6_ADDR *pFromIPv6Address = NULL);
+  BOOL AcquireLocalAddress(LPCTSTR pszHeader, WORD nPort = 0,
+                           const IN_ADDR *pFromAddress = NULL,
+                           const IN6_ADDR *pFromIPv6Address = NULL);
+  BOOL AcquireLocalAddress(const IN_ADDR &pAddress, WORD nPort = 0,
+                           const IN_ADDR *pFromAddress = NULL);
+  BOOL AcquireLocalAddress(const IN6_ADDR &pAddress, WORD nPort = 0,
+                           const IN6_ADDR *pFromAddress = NULL);
+  static BOOL Resolve(LPCTSTR pszHost, int nPort, SOCKADDR_IN *pHost,
+                      BOOL bNames = TRUE);
+  BOOL AsyncResolve(LPCTSTR pszAddress, WORD nPort, PROTOCOLID nProtocol,
+                    BYTE nCommand);
+  // Pending network name resolves queue size
+  UINT GetResolveCount() const;
+  BOOL IsReserved(const IN_ADDR *pAddress) const;
+  BOOL IsReserved(const IN6_ADDR *pAddress) const;
+  WORD RandomPort() const;
+  void CreateID(Hashes::Guid &oID);
+  BOOL IsFirewalledAddress(
+      const IN_ADDR *pAddress, BOOL bIncludeSelf = FALSE,
+      BOOL bIgnoreLocalIP = Settings.Connection.IgnoreLocalIP) const;
+  BOOL IsFirewalledAddress(
+      const IN6_ADDR *pAddress, BOOL bIncludeSelf = FALSE,
+      BOOL bIgnoreLocalIP = Settings.Connection.IgnoreLocalIP) const;
+  BOOL IsValidAddressFor(const IN_ADDR *pForAddress,
+                         const IN_ADDR *pAddress) const;
+  BOOL IsValidAddressFor(const IN6_ADDR *pForAddress,
+                         const IN6_ADDR *pAddress) const;
+  BOOL IsHomeNetwork(const IN_ADDR *pAddress) const;
+  BOOL IsLocalAreaNetwork(const IN_ADDR *pAddress) const;
+  int GetNetworkLevel(const IN_ADDR *pAddress) const;
+  int GetNetworkLevel(const IN6_ADDR *pAddress) const;
+  IN_ADDR GetMyAddressFor(const IN_ADDR *pAddress) const;
+  IN6_ADDR GetMyAddressFor(const IN6_ADDR *pAddress) const;
+  WORD GetPort() const;
 
-    BOOL		GetNodeRoute(const Hashes::Guid& oGUID, CNeighbour** ppNeighbour, SOCKADDR_IN* pEndpoint);
-    BOOL		RoutePacket(CG2Packet* pPacket);
-    BOOL		SendPush(const Hashes::Guid& oGUID, DWORD nIndex = 0);
-    BOOL		RouteHits(CQueryHit* pHits, CPacket* pPacket);
-    void		OnWinsock(WPARAM wParam, LPARAM lParam);
+  BOOL GetNodeRoute(const Hashes::Guid &oGUID, CNeighbour **ppNeighbour,
+                    SOCKADDR_IN *pEndpoint);
+  BOOL RoutePacket(CG2Packet *pPacket);
+  BOOL SendPush(const Hashes::Guid &oGUID, DWORD nIndex = 0);
+  BOOL RouteHits(CQueryHit *pHits, CPacket *pPacket);
+  void OnWinsock(WPARAM wParam, LPARAM lParam);
 
-    // Handle push for downloads, chats and browsers
-    BOOL		OnPush(const Hashes::Guid& oGUID, CConnection* pConnection);
+  // Handle push for downloads, chats and browsers
+  BOOL OnPush(const Hashes::Guid &oGUID, CConnection *pConnection);
 
-    // Add query search to queue
-    void		OnQuerySearch(CLocalSearch* pSearch);
+  // Add query search to queue
+  void OnQuerySearch(CLocalSearch *pSearch);
 
-    // Add query hit to queue
-    void		OnQueryHits(CQueryHit* pHits);
+  // Add query hit to queue
+  void OnQueryHits(CQueryHit *pHits);
 
-    // Safe way to accept socket
-    static SOCKET AcceptSocket(SOCKET hSocket, SOCKADDR_IN* addr, LPCONDITIONPROC lpfnCondition, DWORD_PTR dwCallbackData = 0);
-    static SOCKET AcceptSocket(SOCKET hSocket, SOCKADDR_IN6* addr, LPCONDITIONPROC lpfnCondition, DWORD_PTR dwCallbackData = 0);
+  // Safe way to accept socket
+  static SOCKET AcceptSocket(SOCKET hSocket, SOCKADDR_IN *addr,
+                             LPCONDITIONPROC lpfnCondition,
+                             DWORD_PTR dwCallbackData = 0);
+  static SOCKET AcceptSocket(SOCKET hSocket, SOCKADDR_IN6 *addr,
+                             LPCONDITIONPROC lpfnCondition,
+                             DWORD_PTR dwCallbackData = 0);
 
-    // Safe way to close socket
-    static void	CloseSocket(SOCKET& hSocket, const bool bForce);
-    // Safe way to send TCP data
-    static int Send(SOCKET s, const char* buf, int len);
-    static int SSLSend(SSL* s, const char* buf, int len);
-    // Safe way to send UDP data
-    static int SendTo(SOCKET s, const char* buf, int len, const SOCKADDR_IN* pTo);
-    static int SendTo(SOCKET s, const char* buf, int len, const SOCKADDR_IN6* pTo);
-    // Safe way to receive TCP data
-    static int Recv(SOCKET s, char* buf, int len);
-    static int SSLRecv(SSL* s, char* buf, int len);
-    // Safe way to receive UDP data
-    static int RecvFrom(SOCKET s, char* buf, int len, SOCKADDR_IN* pFrom);
-    static int RecvFrom(SOCKET s, char* buf, int len, SOCKADDR_IN6* pFrom);
-    // Safe way to call InternetOpen
-    static HINTERNET InternetOpen();
-    // Safe way to call InternetOpenUrl
-    static HINTERNET InternetOpenUrl(HINTERNET hInternet, LPCWSTR lpszUrl, LPCWSTR lpszHeaders, DWORD dwHeadersLength, DWORD dwFlags);
-    // Safe way to call WSACleanup
-    static void Cleanup();
+  // Safe way to close socket
+  static void CloseSocket(SOCKET &hSocket, const bool bForce);
+  // Safe way to send TCP data
+  static int Send(SOCKET s, const char *buf, int len);
+  static int SSLSend(SSL *s, const char *buf, int len);
+  // Safe way to send UDP data
+  static int SendTo(SOCKET s, const char *buf, int len, const SOCKADDR_IN *pTo);
+  static int SendTo(SOCKET s, const char *buf, int len,
+                    const SOCKADDR_IN6 *pTo);
+  // Safe way to receive TCP data
+  static int Recv(SOCKET s, char *buf, int len);
+  static int SSLRecv(SSL *s, char *buf, int len);
+  // Safe way to receive UDP data
+  static int RecvFrom(SOCKET s, char *buf, int len, SOCKADDR_IN *pFrom);
+  static int RecvFrom(SOCKET s, char *buf, int len, SOCKADDR_IN6 *pFrom);
+  // Safe way to call InternetOpen
+  static HINTERNET InternetOpen();
+  // Safe way to call InternetOpenUrl
+  static HINTERNET InternetOpenUrl(HINTERNET hInternet, LPCWSTR lpszUrl,
+                                   LPCWSTR lpszHeaders, DWORD dwHeadersLength,
+                                   DWORD dwFlags);
+  // Safe way to call WSACleanup
+  static void Cleanup();
 
-    // Create TCP and UDP port mappings
-    void MapPorts();
-    // Remove TCP and UDP port mappings
-    void DeletePorts();
-    // UPnP success (called by UPnP-services)
-    void OnMapSuccess();
-    // UPnP error (called by UPnP-services)
-    void OnMapFailed();
+  // Create TCP and UDP port mappings
+  void MapPorts();
+  // Remove TCP and UDP port mappings
+  void DeletePorts();
+  // UPnP success (called by UPnP-services)
+  void OnMapSuccess();
+  // UPnP error (called by UPnP-services)
+  void OnMapFailed();
 
-    friend class CHandshakes;
-    friend class CNeighbours;
+  friend class CHandshakes;
+  friend class CNeighbours;
 };
 
 extern CNetwork Network;

@@ -19,122 +19,102 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#include "StdAfx.h"
-#include "Shareaza.h"
-#include "Settings.h"
-#include "Transfers.h"
 #include "Transfer.h"
+#include "Settings.h"
+#include "Shareaza.h"
+#include "StdAfx.h"
+#include "Transfers.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #define new DEBUG_NEW
 #endif
-
 
 //////////////////////////////////////////////////////////////////////
 // CTransfer construction
 
 CTransfer::CTransfer(PROTOCOLID nProtocol)
-    : CConnection		( nProtocol )
-    , m_pServer			( SOCKADDR_IN() )
-    , m_nRunCookie		( 0 )
-    , m_nState			( 0 )
-    , m_nBandwidth		( 0ul )
-    , m_nOffset			( SIZE_UNKNOWN )
-    , m_nLength			( SIZE_UNKNOWN )
-    , m_nPosition		( 0 )
-    , m_tRequest		( 0 )
-{
-    m_pServer.sin_family = AF_INET;
+    : CConnection(nProtocol), m_pServer(SOCKADDR_IN()), m_nRunCookie(0),
+      m_nState(0), m_nBandwidth(0ul), m_nOffset(SIZE_UNKNOWN),
+      m_nLength(SIZE_UNKNOWN), m_nPosition(0), m_tRequest(0) {
+  m_pServer.sin_family = AF_INET;
 }
 
-CTransfer::~CTransfer()
-{
-    ASSERT( ! IsValid() );
-    if ( IsValid() ) Close();
+CTransfer::~CTransfer() {
+  ASSERT(!IsValid());
+  if (IsValid())
+    Close();
 }
 
 //////////////////////////////////////////////////////////////////////
 // CTransfer operations
 
-BOOL CTransfer::ConnectTo(const IN_ADDR* pAddress, WORD nPort)
-{
-    m_nState = 0;
+BOOL CTransfer::ConnectTo(const IN_ADDR *pAddress, WORD nPort) {
+  m_nState = 0;
 
-    if ( CConnection::ConnectTo( pAddress, nPort ) )
-    {
-        Transfers.Add( this );
-        return TRUE;
-    }
+  if (CConnection::ConnectTo(pAddress, nPort)) {
+    Transfers.Add(this);
+    return TRUE;
+  }
 
-    return FALSE;
+  return FALSE;
 }
 
-BOOL CTransfer::ConnectToIPv6(const IN6_ADDR* pAddress, WORD nPort)
-{
-    m_nState = 0;
+BOOL CTransfer::ConnectToIPv6(const IN6_ADDR *pAddress, WORD nPort) {
+  m_nState = 0;
 
-    if ( CConnection::ConnectTo( pAddress, nPort ) )
-    {
-        Transfers.Add( this );
-        return TRUE;
-    }
+  if (CConnection::ConnectTo(pAddress, nPort)) {
+    Transfers.Add(this);
+    return TRUE;
+  }
 
-    return FALSE;
+  return FALSE;
 }
 
-BOOL CTransfer::SSLConnectTo(const IN_ADDR* pAddress, WORD nPort)
-{
-    m_nState = 0;
+BOOL CTransfer::SSLConnectTo(const IN_ADDR *pAddress, WORD nPort) {
+  m_nState = 0;
 
-    if (CConnection::SSLConnectTo(pAddress, nPort))
-    {
-        Transfers.Add(this);
-        return TRUE;
-    }
+  if (CConnection::SSLConnectTo(pAddress, nPort)) {
+    Transfers.Add(this);
+    return TRUE;
+  }
 
-    return FALSE;
+  return FALSE;
 }
 
-BOOL CTransfer::SSLConnectToIPv6(const IN6_ADDR* pAddress, WORD nPort)
-{
-    m_nState = 0;
+BOOL CTransfer::SSLConnectToIPv6(const IN6_ADDR *pAddress, WORD nPort) {
+  m_nState = 0;
 
-    if (CConnection::SSLConnectTo(pAddress, nPort))
-    {
-        Transfers.Add(this);
-        return TRUE;
-    }
+  if (CConnection::SSLConnectTo(pAddress, nPort)) {
+    Transfers.Add(this);
+    return TRUE;
+  }
 
-    return FALSE;
+  return FALSE;
 }
 
-void CTransfer::AttachTo(CConnection* pConnection)
-{
-    CConnection::AttachTo( pConnection );
-    Transfers.Add( this );
+void CTransfer::AttachTo(CConnection *pConnection) {
+  CConnection::AttachTo(pConnection);
+  Transfers.Add(this);
 }
 
-void CTransfer::Close(UINT nError)
-{
-    Transfers.Remove( this );
-    CConnection::Close( nError );
+void CTransfer::Close(UINT nError) {
+  Transfers.Remove(this);
+  CConnection::Close(nError);
 }
 
 //////////////////////////////////////////////////////////////////////
 // CTransfer HTTP headers
 
-void CTransfer::ClearHeaders()
-{
-    m_pHeaderName.RemoveAll();
-    m_pHeaderValue.RemoveAll();
+void CTransfer::ClearHeaders() {
+  m_pHeaderName.RemoveAll();
+  m_pHeaderValue.RemoveAll();
 }
 
-BOOL CTransfer::OnHeaderLine(CString& strHeader, CString& strValue)
-{
-    m_pHeaderName.Add( strHeader );
-    m_pHeaderValue.Add( strValue );
+BOOL CTransfer::OnHeaderLine(CString &strHeader, CString &strValue) {
+  m_pHeaderName.Add(strHeader);
+  m_pHeaderValue.Add(strValue);
 
-    return CConnection::OnHeaderLine( strHeader, strValue );
+  return CConnection::OnHeaderLine(strHeader, strValue);
 }

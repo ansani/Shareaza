@@ -25,34 +25,32 @@
 
 class CBuffer;
 
-
-class CTransfer abstract : public CConnection
-{
+class CTransfer abstract : public CConnection {
 public:
-    CTransfer(PROTOCOLID nProtocol = PROTOCOL_ANY);
-    virtual ~CTransfer();
+  CTransfer(PROTOCOLID nProtocol = PROTOCOL_ANY);
+  virtual ~CTransfer();
 
-    SOCKADDR_IN			m_pServer;			// Reference server (ED2K, DC++)
-    CString				m_sRemoteNick;		// Remote user nick
-    DWORD				m_nRunCookie;
-    CList< CString >	m_pSourcesSent;
-    CArray< CString >	m_pHeaderName;
-    CArray< CString >	m_pHeaderValue;
-    int					m_nState;			// Common state code
-    DWORD				m_nBandwidth;		// Bandwidth allocated
-    QWORD				m_nOffset;			// Fragment offset
-    QWORD				m_nLength;			// Fragment length
-    QWORD				m_nPosition;		// Fragment position
-    DWORD				m_tRequest;			// The time a request was sent
+  SOCKADDR_IN m_pServer; // Reference server (ED2K, DC++)
+  CString m_sRemoteNick; // Remote user nick
+  DWORD m_nRunCookie;
+  CList<CString> m_pSourcesSent;
+  CArray<CString> m_pHeaderName;
+  CArray<CString> m_pHeaderValue;
+  int m_nState;       // Common state code
+  DWORD m_nBandwidth; // Bandwidth allocated
+  QWORD m_nOffset;    // Fragment offset
+  QWORD m_nLength;    // Fragment length
+  QWORD m_nPosition;  // Fragment position
+  DWORD m_tRequest;   // The time a request was sent
 
-    virtual BOOL	ConnectTo(const IN_ADDR* pAddress, WORD nPort);
-    virtual BOOL	ConnectToIPv6(const IN6_ADDR* pAddress, WORD nPort);
-    virtual BOOL	SSLConnectTo(const IN_ADDR* pAddress, WORD nPort);
-    virtual BOOL	SSLConnectToIPv6(const IN6_ADDR* pAddress, WORD nPort);
-    virtual void	AttachTo(CConnection* pConnection);
-    virtual void	Close(UINT nError = 0);
+  virtual BOOL ConnectTo(const IN_ADDR *pAddress, WORD nPort);
+  virtual BOOL ConnectToIPv6(const IN6_ADDR *pAddress, WORD nPort);
+  virtual BOOL SSLConnectTo(const IN_ADDR *pAddress, WORD nPort);
+  virtual BOOL SSLConnectToIPv6(const IN6_ADDR *pAddress, WORD nPort);
+  virtual void AttachTo(CConnection *pConnection);
+  virtual void Close(UINT nError = 0);
 
 protected:
-    void			ClearHeaders();
-    virtual BOOL	OnHeaderLine(CString& strHeader, CString& strValue);
+  void ClearHeaders();
+  virtual BOOL OnHeaderLine(CString &strHeader, CString &strValue);
 };
