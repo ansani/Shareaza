@@ -29,6 +29,8 @@
 #include "SharedFile.h"
 #include "Transfer.h"
 #include "VersionChecker.h"
+#include <boost/json.hpp>
+
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -150,19 +152,49 @@ void CVersionChecker::OnRun()
 	}
 }
 
+void JsonToCStringIMap(const boost::json::value& jVal, CStringIMap& map, const CString& prefix = _T("")) {
+	if (jVal.is_object()) {
+		for (const auto& kv : jVal.as_object()) {
+			const auto& key = kv.key();
+			const auto& value = kv.value();
+
+			CString keyStr(key.data());  // Use data() instead of c_str()
+			JsonToCStringIMap(value, map, prefix + keyStr + _T("."));
+		}
+	}
+	else if (jVal.is_array()) {
+		const auto& arr = jVal.as_array();
+		for (std::size_t i = 0; i < arr.size(); ++i) {
+			CString indexStr;
+			indexStr.Format(_T("%zu"), i);
+			JsonToCStringIMap(arr[i], map, prefix + indexStr + _T("."));
+		}
+	}
+	else if (jVal.is_string()) {
+		CString valueStr(jVal.as_string().data(), static_cast<int>(jVal.as_string().size()));
+		CString finalKey = prefix;
+		finalKey.TrimRight(_T("."));
+		map[finalKey] = valueStr;
+	}
+	else {
+		std::string narrowStr = boost::json::serialize(jVal);
+		CString valueStr = CA2W(narrowStr.c_str());
+		CString finalKey = prefix;
+		finalKey.TrimRight(_T("."));
+		map[finalKey] = valueStr;
+	}
+}
+
+
+
+
 //////////////////////////////////////////////////////////////////////
 // CVersionChecker undertake request
 
 BOOL CVersionChecker::ExecuteRequest()
 {
-	CString strURL = Settings.VersionCheck.UpdateCheckURL
-		+ _T("?Version=") + theApp.m_sVersion
-#ifdef _WIN64
-		+ _T("&Platform=Win64")
-#else
-		+ _T("&Platform=Win32")
-#endif
-	;
+	CString strURL = Settings.VersionCheck.UpdateCheckURL;
+
 	if ( ! m_pRequest.SetURL( strURL ) )
 		return FALSE;
 	
@@ -179,23 +211,40 @@ BOOL CVersionChecker::ExecuteRequest()
 
 	theApp.Message( MSG_DEBUG | MSG_FACILITY_INCOMING, _T("[VersionChecker] Response: %s"), (LPCTSTR)strOutput );
 
-	for ( strOutput += '&' ; strOutput.GetLength() ; )
-	{
-		CString strItem	= strOutput.SpanExcluding( _T("&") );
-		strOutput		= strOutput.Mid( strItem.GetLength() + 1 );
+	CT2CA pszConvertedAnsiString(strOutput);
+	std::string jsonResponse(pszConvertedAnsiString);
 
-		CString strKey = strItem.SpanExcluding( _T("=") );
-		if ( strKey.GetLength() == strItem.GetLength() )
-			continue;
-
-		strItem = URLDecode( strItem.Mid( strKey.GetLength() + 1 ) );
-		strItem.Trim();
-
-		m_pResponse.SetAt( strKey, strItem );
-	}
-
+	// Parse the JSON
+	boost::json::object obj = boost::json::parse(jsonResponse).as_object();
+	JsonToCStringIMap(obj, m_pResponse);
+	
 	return TRUE;
+
 }
+
+// Find URI Asset
+CString FindAssetURI(const CStringIMap& map, const CString platform, const CString buildtype) {
+	POSITION pos = map.GetStartPosition();
+	while (pos != NULL) {
+		CString key, value;
+		map.GetNextAssoc(pos, key, value);
+
+		if (key.Find(_T("asset")) == 0 && key.Find(_T("browser_download_url")) != -1 && value.Find(platform) != -1 && value.Find(buildtype) != -1) {
+			return value;
+		}
+	}
+	return _T("");  // Return an empty string if no matching value is found
+}
+
+// Extract File Name from URI
+CString ExtractFileNameFromURI(const CString& URI) {
+	int pos = URI.ReverseFind(_T('/'));
+	if (pos != -1) {
+		return URI.Mid(pos + 1);
+	}
+	return _T("");  // Return an empty string if no slash is found
+}
+
 
 //////////////////////////////////////////////////////////////////////
 // CVersionChecker process response
@@ -216,7 +265,8 @@ void CVersionChecker::ProcessResponse()
 		Settings.VersionCheck.Quote = strValue;
 	}
 	
-	if ( m_pResponse.Lookup( _T("SystemMsg"), strValue ) )
+	//SystemMsg
+	if ( m_pResponse.Lookup( _T("body"), strValue ) )
 	{
 		for ( strValue += '\n' ; strValue.GetLength() ; )
 		{
@@ -226,16 +276,43 @@ void CVersionChecker::ProcessResponse()
 		}
 	}
 	
-	if ( m_pResponse.Lookup( _T("UpgradePrompt"), strValue ) )
+	//UpgradePrompt
+	if ( m_pResponse.Lookup( _T("name"), strValue ) )
 	{
-		Settings.VersionCheck.UpgradePrompt = strValue;
-		
-		m_pResponse.Lookup( _T("UpgradeFile"), Settings.VersionCheck.UpgradeFile );
+		Settings.VersionCheck.UpgradePrompt = _T("New version available: ") + strValue;
+		Settings.VersionCheck.UpgradePrompt.Append(_T("\r\nRelease date: "));
+		m_pResponse.Lookup(_T("published_at"), strValue);
+		Settings.VersionCheck.UpgradePrompt.Append(strValue);
+		Settings.VersionCheck.UpgradePrompt.Append(_T("\r\nChangelog: "));
+		m_pResponse.Lookup(_T("body"), strValue);
+		Settings.VersionCheck.UpgradePrompt.Append(strValue);
+
+
+		CString s_platform =
+#ifdef _WIN64
+			_T("x64");
+#else
+			_T("Win32");
+#endif
+
+		CString s_buildType =
+#ifdef DEBUG
+			_T("Debug");
+#else
+			_T("Release");
+#endif 
+
+
+		CString s_UriAsset = FindAssetURI(m_pResponse, s_platform, s_buildType);
+
+		Settings.VersionCheck.UpgradeFile = ExtractFileNameFromURI(s_UriAsset);
+//		m_pResponse.Lookup( _T("UpgradeFile"), Settings.VersionCheck.UpgradeFile );
 		m_pResponse.Lookup( _T("UpgradeSHA1"), Settings.VersionCheck.UpgradeSHA1 );
 		m_pResponse.Lookup( _T("UpgradeTiger"), Settings.VersionCheck.UpgradeTiger );
 		m_pResponse.Lookup( _T("UpgradeSize"), Settings.VersionCheck.UpgradeSize );
-		m_pResponse.Lookup( _T("UpgradeSources"), Settings.VersionCheck.UpgradeSources );
-		m_pResponse.Lookup( _T("UpgradeVersion"), Settings.VersionCheck.UpgradeVersion );
+		Settings.VersionCheck.UpgradeSources = s_UriAsset;
+//		m_pResponse.Lookup( _T("UpgradeSources"), Settings.VersionCheck.UpgradeSources );
+		m_pResponse.Lookup( _T("name"), Settings.VersionCheck.UpgradeVersion );
 
 		// Old name
 		if ( ! Settings.VersionCheck.UpgradeSHA1.GetLength() )
