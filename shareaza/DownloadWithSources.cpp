@@ -664,7 +664,7 @@ BOOL CDownloadWithSources::AddSourceInternal(CDownloadSource* pSource)
 	if ( pSource->m_nRedirectionCount == 0 ) // Don't check for existing sources if source is a redirection
 	{
 		bool bDeleteSource = false;
-		bool bHTTPSource = pSource->IsHTTPSource();
+		bool bHTTPSource = pSource->IsHTTPSource() || pSource->IsSSLSource();
 		bool bNeedHTTPSource = ! bHTTPSource &&
 			Settings.Gnutella2.EnableToday &&
 			VendorCache.IsExtended( pSource->m_sServer );
@@ -677,7 +677,7 @@ BOOL CDownloadWithSources::AddSourceInternal(CDownloadSource* pSource)
 			ASSERT( pSource != pExisting );
 			if ( pExisting->Equals( pSource ) ) // IPs and ports are equal
 			{
-				bool bExistingHTTPSource = pExisting->IsHTTPSource();
+				bool bExistingHTTPSource = pExisting->IsHTTPSource() || pExisting->IsSSLSource();
 				pExisting->SetLastSeen();
 
 				if ( bNeedHTTPSource && bExistingHTTPSource )
@@ -821,6 +821,7 @@ CString CDownloadWithSources::GetSourceURLs(CList< CString >* pState, int nMaxim
 		{
 			// Only return appropriate sources
 			if ( ( nProtocol == PROTOCOL_HTTP ) && ( pSource->m_nProtocol != PROTOCOL_HTTP ) ) continue;
+			if ((nProtocol == PROTOCOL_SSL) && (pSource->m_nProtocol != PROTOCOL_SSL)) continue;
 			if ( ( nProtocol == PROTOCOL_G1 ) && ( pSource->m_nGnutella != 1 ) ) continue;
 			//if ( bHTTP && pSource->m_nProtocol != PROTOCOL_HTTP ) continue;
 
@@ -1089,6 +1090,7 @@ void CDownloadWithSources::InternalAdd(CDownloadSource* pSource)
 		m_nEdSourceCount++;
 		break;
 	case PROTOCOL_HTTP:
+	case PROTOCOL_SSL:
 		m_nHTTPSourceCount++;
 		break;
 	case PROTOCOL_BT:
@@ -1125,6 +1127,7 @@ void CDownloadWithSources::InternalRemove(CDownloadSource* pSource)
 		m_nEdSourceCount--;
 		break;
 	case PROTOCOL_HTTP:
+	case PROTOCOL_SSL:
 		m_nHTTPSourceCount--;
 		break;
 	case PROTOCOL_BT:

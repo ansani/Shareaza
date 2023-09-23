@@ -333,7 +333,7 @@ void CDownloadTransfer::SetState(int nState)
 				}
 				m_pSource->m_nSortOrder <<=  8;									//Sort by state
 
-				if ( m_nProtocol != PROTOCOL_HTTP )
+				if ( m_nProtocol != PROTOCOL_HTTP && m_nProtocol != PROTOCOL_SSL )
 					m_pSource->m_nSortOrder += ( m_nProtocol & 0xFF );
 				m_pSource->m_nSortOrder <<=  16;								//Then protocol
 

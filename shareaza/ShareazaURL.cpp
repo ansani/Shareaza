@@ -133,7 +133,7 @@ BOOL CShareazaURL::Parse(const CString& sText, CList< CString >& pURLs, BOOL bRe
 	CList< CString > oReverse;
 	while ( ( sPart = sText.Tokenize( _T("\n"), curPos ) ).GetLength() )
 	{
-		oReverse.AddHead( sPart.Trim( _T("\r\n\t >< ") ) ); // second space is #160
+		oReverse.AddHead( sPart.Trim( _T("\r\n\t ><ï¿½") ) ); // second space is #160
 	}
 
 	CString sBuf;
@@ -180,6 +180,10 @@ BOOL CShareazaURL::ParseRoot(LPCTSTR pszURL, BOOL bResolve)
 	if ( _tcsncmp( pszURL, _T("http:"), 5 ) == 0 )
 	{
 		return ParseHTTP( SkipSlashes( pszURL, 5 ), bResolve );
+	}
+	else if (_tcsncmp(pszURL, _T("https:"), 6) == 0)
+	{
+		return ParseHTTPS(SkipSlashes(pszURL, 6), bResolve);
 	}
 	else if ( _tcsncmp( pszURL, _T("ftp:"), 4 ) == 0 )
 	{
@@ -323,6 +327,84 @@ BOOL CShareazaURL::ParseHTTP(LPCTSTR pszURL, BOOL bResolve)
 
 	return bResult;
 }
+
+BOOL CShareazaURL::ParseHTTPS(LPCTSTR pszURL, BOOL bResolve)
+{
+	Clear();
+
+	CString strURL = pszURL;
+
+	int nSlash = strURL.Find(_T('/'));
+
+	if (nSlash >= 0)
+	{
+		m_sAddress = strURL.Left(nSlash);
+		m_sPath = strURL.Mid(nSlash);
+	}
+	else
+	{
+		m_sAddress = strURL;
+		m_sPath = _T("/");
+	}
+
+	int nAt = m_sAddress.Find(_T('@'));
+	if (nAt >= 0) m_sAddress = m_sAddress.Mid(nAt + 1);
+
+	if (m_sAddress.IsEmpty()) return FALSE;
+
+	if (StartsWith(m_sPath, _PT("/uri-res/N2R?")))
+	{
+		strURL = m_sPath.Mid(13);
+		if (m_oSHA1.fromUrn(strURL));
+		else if (m_oTiger.fromUrn(strURL));
+		else if (m_oED2K.fromUrn(strURL));
+		else if (m_oBTH.fromUrn(strURL));
+		else if (m_oBTH.fromUrn< Hashes::base16Encoding >(strURL));
+		else if (m_oMD5.fromUrn(strURL));
+		else
+			return FALSE;
+
+		m_nAction = uriSource;
+	}
+	else
+	{
+		m_nAction = uriDownload;
+
+		CString sName(URLDecode(m_sPath.Mid(m_sPath.ReverseFind('/') + 1).SpanExcluding(_T("?"))));
+		if (sName.GetLength())
+		{
+			m_sName = sName;
+		}
+	}
+
+
+	BOOL bResult = 0;
+	SOCKADDR_IN6 pHost = {};
+	if (bResult = IPv6FromString(m_sAddress, &pHost))
+	{
+		m_pAddressIPv6 = pHost.sin6_addr;
+
+		if (pHost.sin6_port)
+			m_nPort = ntohs(pHost.sin6_port);
+		else
+			m_nPort = INTERNET_DEFAULT_HTTPS_PORT;
+	}
+	else
+	{
+		SOCKADDR_IN saHost;
+
+		bResult = Network.Resolve(m_sAddress, INTERNET_DEFAULT_HTTPS_PORT, &saHost, bResolve);
+
+		m_pAddress = saHost.sin_addr;
+		m_nPort = htons(saHost.sin_port);
+	}
+
+	m_sURL.Format(_T("https://%s"), pszURL);
+	m_nProtocol = PROTOCOL_SSL;
+
+	return bResult;
+}
+
 
 //////////////////////////////////////////////////////////////////////
 // CShareazaURL FTP

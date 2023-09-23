@@ -30,6 +30,7 @@
 #include "DownloadTransferED2K.h"
 #include "DownloadTransferFTP.h"
 #include "DownloadTransferHTTP.h"
+#include "DownloadTransferHTTPS.h"
 #include "Downloads.h"
 #include "DCClient.h"
 #include "DCClients.h"
@@ -522,6 +523,8 @@ CDownloadTransfer* CDownloadSource::CreateTransfer(LPVOID pParam)
 		return ( m_pTransfer = new CDownloadTransferED2K( this ) );
 	case PROTOCOL_HTTP:
 		return ( m_pTransfer = new CDownloadTransferHTTP( this ) );
+	case PROTOCOL_SSL:
+		return ( m_pTransfer = new CDownloadTransferHTTPS(this));
 	case PROTOCOL_FTP:
 		return ( m_pTransfer = new CDownloadTransferFTP( this ) );
 	case PROTOCOL_BT:
@@ -554,6 +557,7 @@ BOOL CDownloadSource::CanInitiate(BOOL bNetwork, BOOL bEstablished, bool bFirstA
 			if ( ! Settings.eDonkey.EnableToday || ! bNetwork ) return FALSE;
 			break;
 		case PROTOCOL_HTTP:
+		case PROTOCOL_SSL:
 			switch( m_nGnutella )
 			{
 			case 0:
@@ -621,6 +625,7 @@ bool CDownloadSource::IsPreviewCapable() const
 	switch ( m_nProtocol )
 	{
 	case PROTOCOL_HTTP:
+	case PROTOCOL_SSL:
 		return ( m_bPreview != FALSE );
 
 	case PROTOCOL_ED2K:
@@ -940,7 +945,7 @@ BOOL CDownloadSource::PushRequest()
 
 BOOL CDownloadSource::CheckPush(const Hashes::Guid& oClientID)
 {
-	return ( m_nProtocol == PROTOCOL_HTTP || m_nProtocol == PROTOCOL_DC ) &&
+	return ( m_nProtocol == PROTOCOL_HTTP || m_nProtocol == PROTOCOL_SSL || m_nProtocol == PROTOCOL_DC ) &&
 		validAndEqual( m_oGUID, oClientID );
 }
 

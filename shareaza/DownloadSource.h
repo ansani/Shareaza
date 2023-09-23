@@ -171,6 +171,11 @@ public:
 		return ( m_nProtocol == PROTOCOL_HTTP || m_nProtocol == PROTOCOL_G2 );
 	}
 
+	inline bool IsSSLSource() const
+	{
+		return (m_nProtocol == PROTOCOL_SSL );
+	}
+
 	inline bool IsIPv6Source() const
 	{
 		if ( m_pAddress.s_addr == 0 )

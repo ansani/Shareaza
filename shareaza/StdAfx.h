@@ -403,7 +403,8 @@ enum PROTOCOLID
 	PROTOCOL_BT   = 6,
 	PROTOCOL_KAD  = 7,
 	PROTOCOL_DC   = 8,
-	PROTOCOL_LAST = 9
+	PROTOCOL_LAST = 9,
+	PROTOCOL_SSL  = 10
 };
 
 // Protocol full names
