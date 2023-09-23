@@ -332,3 +332,6 @@ pip-log.txt
 #NuGet
 /vc143/.vs/*
 /vc143/packages/*
+
+#Resources
+/shareaza/Res/*.gz
