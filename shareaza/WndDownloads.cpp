@@ -691,8 +691,14 @@ void CDownloadsWnd::OnUpdateDownloadsResume(CCmdUI* pCmdUI)
 {
 	Prepare();
 	if ( CCoolBarItem* pcCmdUI = CCoolBarItem::FromCmdUI( pCmdUI ) )
-		pcCmdUI->Show( m_bSelPaused || ( m_bSelDownload && ! m_bSelTrying && ! m_bSelCompleted ) );
-	pCmdUI->Enable( m_bSelPaused || ( m_bSelDownload && ! m_bSelTrying && ! m_bSelCompleted ) );
+		pcCmdUI->Show( m_bSelPaused 
+						|| ( m_bSelDownload && ! m_bSelTrying && ! m_bSelCompleted ) 
+						|| ( ( m_nSelectedDownloads > 1 ) && (m_bSelDownload && !m_bSelCompleted) )
+					  );
+	pCmdUI->Enable( m_bSelPaused 
+					|| ( m_bSelDownload &&  ! m_bSelTrying && ! m_bSelCompleted ) 
+					|| ((m_nSelectedDownloads > 1) && (m_bSelDownload && !m_bSelCompleted))
+				  );
 }
 
 void CDownloadsWnd::OnDownloadsResume()
@@ -703,9 +709,13 @@ void CDownloadsWnd::OnDownloadsResume()
 	{
 		CDownload* pDownload = Downloads.GetNext( pos );
 
-		if ( pDownload->m_bSelected )
+		// We must checkexplicitily if the download is Trying (as we ignore the setting in group selection)
+		if ( pDownload->m_bSelected && !pDownload->IsTrying() )
 		{
 			pDownload->Resume();
+		} 
+		else if (pDownload->IsTrying()) {
+			theApp.Message(MSG_INFO, _T("Cannot resume an already searching download"));
 		}
 	}
 
