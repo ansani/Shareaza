@@ -864,7 +864,7 @@ void CDownloadsWnd::OnDownloadsClearIncomplete()
 				pList.RemoveHead();
 				continue;
 			}
-			else if ( ! pDownload1->IsStarted() )
+			else if ( false && ! pDownload1->IsStarted() )
 			{
 				pList.RemoveHead();
 				pDownload1->Remove();
