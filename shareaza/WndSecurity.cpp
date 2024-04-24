@@ -152,12 +152,7 @@ void CSecurityWnd::Update(int nColumn, BOOL bSort)
 		SetWindowLongPtr( m_wndList.GetSafeHwnd(), GWLP_USERDATA, 0 - nColumn - 1 );
 	}
 
-	SetRedraw(0);
-
 	pLiveList->Apply( &m_wndList, bSort );
-
-	SetRedraw(1);
-	Invalidate();
 
 	tLastUpdate = GetTickCount();				// Update time after it's done doing its work
 }
