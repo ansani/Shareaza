@@ -98,6 +98,8 @@ void CLiveList::Apply(CListCtrl* pCtrl, BOOL bSort)
 
 	BOOL bModified = FALSE;
 
+	pCtrl->SetRedraw(0);
+
 	for ( int nItem = 0 ; nItem < pCtrl->GetItemCount() ; nItem++ )
 	{
 		DWORD nParam		= (DWORD)pCtrl->GetItemData( nItem );
@@ -136,6 +138,9 @@ void CLiveList::Apply(CListCtrl* pCtrl, BOOL bSort)
 	m_pItems.RemoveAll();
 
 	if ( bModified && bSort ) Sort( pCtrl, -1 );
+
+	pCtrl->SetRedraw(1);
+	pCtrl->Invalidate();
 }
 
 //////////////////////////////////////////////////////////////////////

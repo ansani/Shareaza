@@ -103,10 +103,12 @@ int CSecurityWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	m_pSizer.Attach( &m_wndList );
 	
+	
 	m_wndList.SendMessage( LVM_SETEXTENDEDLISTVIEWSTYLE,
 		LVS_EX_DOUBLEBUFFER|LVS_EX_FULLROWSELECT|LVS_EX_HEADERDRAGDROP|LVS_EX_LABELTIP,
 		LVS_EX_DOUBLEBUFFER|LVS_EX_FULLROWSELECT|LVS_EX_HEADERDRAGDROP|LVS_EX_LABELTIP );
 	
+
 	CoolInterface.LoadIconsTo( m_gdiImageList, nImageID );
 	m_wndList.SetImageList( &m_gdiImageList, LVSIL_SMALL );
 
