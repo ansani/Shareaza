@@ -21,7 +21,7 @@ jobs:
         type: [ Release, Debug ]
     steps:
     - name: Checkout GIT sources
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
@@ -36,7 +36,7 @@ jobs:
         versionSpec: '5.x'
 
     - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.3
+      uses: microsoft/setup-msbuild@v2
 
     - name: Restore NuGet packages (zlibwapi)
       working-directory: ${{env.GITHUB_WORKSPACE}}
