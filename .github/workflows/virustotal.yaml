@@ -16,6 +16,8 @@ jobs:
         path: .
         github-token: ${{ secrets.GH_PAT }} # token with actions:read permissions on target repo
         merge-multiple: true
+    - name: Display structure of downloaded files
+      run: ls -R .
 
   virustotal:
     runs-on: ubuntu-latest
