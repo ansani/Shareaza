@@ -65,6 +65,7 @@ jobs:
                 path: setup/builds/*.exe
         
     publish:
+        needs: workflow_matrix
         runs-on: ubuntu-latest
         steps:
         - name: Download All Artifacts
