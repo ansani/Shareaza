@@ -269,8 +269,8 @@ ID_NETWORK_DC           ICON                    "Res\\Network_DC.ico"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,7,10,5
- PRODUCTVERSION 2,7,10,5
+ FILEVERSION 2,7,10,6
+ PRODUCTVERSION 2,7,10,6
  FILEFLAGSMASK 0x1fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -288,12 +288,12 @@ BEGIN
             VALUE "Comments", "Shareaza Ultimate File Sharing"
             VALUE "CompanyName", "Shareaza Development Team"
             VALUE "FileDescription", "Shareaza Ultimate File Sharing"
-            VALUE "FileVersion", "2.7.10.5"
+            VALUE "FileVersion", "2.7.10.6"
             VALUE "InternalName", "Shareaza"
-            VALUE "LegalCopyright", "Copyright © Shareaza Development Team, 2002-2017. All rights reserved."
+            VALUE "LegalCopyright", "Copyright ï¿½ Shareaza Development Team, 2002-2017. All rights reserved.\\nCopyright ï¿½ Salvatore Ansani, 2023-2024. All rights reserved."
             VALUE "OriginalFilename", "Shareaza.exe"
             VALUE "ProductName", "Shareaza"
-            VALUE "ProductVersion", "2.7.10.5"
+            VALUE "ProductVersion", "2.7.10.6"
         END
     END
     BLOCK "VarFileInfo"
@@ -620,8 +620,8 @@ CAPTION "About Shareaza"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     LTEXT           "Shareaza File Sharing Client ",IDC_TITLE,7,15,279,10,SS_CENTERIMAGE
-    LTEXT           "Copyright © Shareaza Development Team, 2002-",IDC_COPYRIGHT,7,25,279,12
-    LTEXT           "Copyright © Salvatore Ansani, 2022-2023",IDC_COPYRIGHT, 7, 33, 279, 12
+    LTEXT           "Copyright ï¿½ Shareaza Development Team, 2002-",IDC_COPYRIGHT,7,25,279,12
+    LTEXT           "Copyright ï¿½ Salvatore Ansani, 2022-2023",IDC_COPYRIGHT, 7, 33, 279, 12
     LTEXT           "Shareaza is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.",IDC_STATIC,7,45,279,24
     LTEXT           "Logo by Kid at pakkeimak.com",IDC_STATIC,7,75,279,12
     LTEXT           "http://github.com/ansani/shareaza",IDC_WEB,7,112,279,10
@@ -3573,7 +3573,7 @@ BEGIN
     IDS_SEARCH_PAD_TYPE     "What type of file is it?"
     IDS_SEARCH_PAD_CLEAR_HISTORY "(Clear Search History)"
     IDS_SEARCH_PANEL_INPUT_4 "File size must be"
-    IDS_SEARCH_PANEL_INPUT_5 " to"
+    IDS_SEARCH_PANEL_INPUT_5 "ï¿½to"
 END
 
 STRINGTABLE 
@@ -4189,7 +4189,7 @@ BEGIN
     IDS_MEDIA_PARTIAL_RENDER 
                             "Part of this file could not be played, you may need to download additional codecs."
     IDS_MEDIA_EMPTY         "There is no file playing. Double-click a media file in your library to play it."
-    IDS_MEDIA_TITLE         "S     H     A     R     E     A     Z     A           M     E     D     I     A           S     Y     S     T     E     M"
+    IDS_MEDIA_TITLE         "S ï¿½ ï¿½ H ï¿½ ï¿½ A ï¿½ ï¿½ R ï¿½ ï¿½ E ï¿½ ï¿½ A ï¿½ ï¿½ Z ï¿½ ï¿½ A ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ M ï¿½ ï¿½ E ï¿½ ï¿½ D ï¿½ ï¿½ I ï¿½ ï¿½ A ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ S ï¿½ ï¿½ Y ï¿½ ï¿½ S ï¿½ ï¿½ T ï¿½ ï¿½ E ï¿½ ï¿½ M"
     IDS_MEDIA_PLAYLIST      "P L A Y L I S T"
 END
 
