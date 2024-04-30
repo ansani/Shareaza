@@ -200,22 +200,18 @@ Source: "{#Compiler}\{#PlatformName}\{#ConfigurationName}\zlibwapi.dll"; DestDir
 ; BZLib
 Source: "{#Compiler}\{#PlatformName}\{#ConfigurationName}\bzlib.dll"; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
 
-; BugTrap
-#if ConfigurationName == "Debug"
+; BugSplat
 #if PlatformName == "Win32"
-Source: "BugTrap\BugTrapD.dll"; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
+Source: "BugSplat\{#PlatformName}\{#ConfigurationName}\BugSplat.dll" ; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
+Source: "BugSplat\{#PlatformName}\{#ConfigurationName}\BsSndRpt.exe" ; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
+Source: "BugSplat\{#PlatformName}\{#ConfigurationName}\BugSplatRC.dll" ; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
+Source: "BugSplat\{#PlatformName}\{#ConfigurationName}\BugSplatHD.exe" ; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
 #elif PlatformName == "x64"
-Source: "BugTrap\BugTrapD-x64.dll"; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
+Source: "BugSplat\{#PlatformName}\{#ConfigurationName}\BugSplat64.dll" ; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
+Source: "BugSplat\{#PlatformName}\{#ConfigurationName}\BsSndRpt64.exe" ; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
+Source: "BugSplat\{#PlatformName}\{#ConfigurationName}\BugSplatRC64.dll" ; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
+Source: "BugSplat\{#PlatformName}\{#ConfigurationName}\BugSplatHD64.exe" ; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
 #endif
-#elif ConfigurationName == "Release"
-#if PlatformName == "Win32"
-Source: "BugTrap\BugTrap.dll"; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
-#elif PlatformName == "x64"
-Source: "BugTrap\BugTrap-x64.dll"; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
-#endif
-#endif
-
-Source: "BugTrap\dbghelp.dll"; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
 
 ; HashLib
 Source: "{#Compiler}\{#PlatformName}\{#ConfigurationName}\HashLib.dll"; DestDir: "{app}"; DestName: "HashLib.dll"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
