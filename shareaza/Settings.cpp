@@ -662,7 +662,7 @@ void CSettings::Load()
 
 	if ( Downloads.CompletePath.IsEmpty() || ! CreateDirectory( Downloads.CompletePath ) )
 	{
-		Downloads.CompletePath = theApp.GetDownloadsFolder();
+		Downloads.CompletePath = theApp.GetDownloadsFolder() + _T("\\Shareaza");
 		CreateDirectory( Downloads.CompletePath );
 	}
 
