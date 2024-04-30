@@ -22,9 +22,11 @@ jobs:
   virustotal:
     runs-on: ubuntu-latest
     steps:
+      - name: Display structure of downloaded files
+        run: ls -R .
       - name: VirusTotal Scan
         uses: crazy-max/ghaction-virustotal@v4
         with:
           vt_api_key: ${{ secrets.VT_API_KEY }}
           files: |
-            ./*.exe
+            *.exe
