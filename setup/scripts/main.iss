@@ -266,7 +266,6 @@ Source: "{#Compiler}\{#PlatformName}\{#ConfigurationName}\ZIPBuilder.dll"; DestD
 
 ; Main files
 Source: "{#Compiler}\{#PlatformName}\{#ConfigurationName}\Shareaza.pdb"; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
-;Source: "{#Compiler}\{#PlatformName}\{#ConfigurationName}\BugTrap.pdb"; DestDir: "{app}"; Flags: overwritereadonly replacesameversion restartreplace uninsremovereadonly sortfilesbyextension
 
 #endif
 
@@ -541,6 +540,8 @@ Type: files; Name: "{app}\*.dat"
 Type: files; Name: "{app}\*.xml"
 Type: files; Name: "{app}\*.png"
 Type: files; Name: "{app}\*.bmp"
+Type: files; Name: "{app}\*.dll"
+Type: files; Name: "{app}\*.exe"
 Type: files; Name: "{app}\Data\*.url"
 Type: filesandordirs; Name: "{app}\Uninstall"
 Type: filesandordirs; Name: "{app}\Plugins"
