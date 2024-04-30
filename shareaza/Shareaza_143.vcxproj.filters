@@ -2769,4 +2769,8 @@
       <Filter>Resource Files</Filter>
     </CustomBuild>
   </ItemGroup>
+  <ItemGroup>
+    <Xml Include="Res\ShareazaFileListStyle.xsl" />
+    <Xml Include="Res\DCFileListStyle.xsl" />
+  </ItemGroup>
 </Project>
