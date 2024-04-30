@@ -228,8 +228,7 @@ using augment::IUnknownImplementation;
 
 #include "../HashLib/HashLib.h"
 
-// BugTrap http://www.intellesoft.net/
-#include "../BugTrap/BugTrap.h"
+#include "../BugSplat/inc/BugSplat.h"
 
 // GeoIP http://geolite.maxmind.com/
 #include "../GeoIP/GeoIP.h"

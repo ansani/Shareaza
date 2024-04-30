@@ -298,16 +298,6 @@ CShareazaApp::CShareazaApp()
 	ZeroMemory( m_nVersion, sizeof( m_nVersion ) );
 	ZeroMemory( m_pBTVersion, sizeof( m_pBTVersion ) );
 
-// BugTrap http://www.intellesoft.net/
-	BT_SetAppName( MOD_CLIENT_NAME_T );
-	BT_SetFlags( BTF_INTERCEPTSUEF | BTF_SHOWADVANCEDUI | BTF_DESCRIBEERROR | BTF_DETAILEDMODE | BTF_ATTACHREPORT | BTF_EDITMAIL );
-	BT_SetExitMode( BTEM_CONTINUESEARCH );
-	BT_SetDumpType( 0x00001851 /* MiniDumpWithDataSegs | MiniDumpScanMemory | MiniDumpWithIndirectlyReferencedMemory | MiniDumpWithFullMemoryInfo | MiniDumpWithThreadInfo */ );
-	BT_SetSupportEMail( _T("salvatoreansani@gmail.com") );
-	BT_SetSupportURL( WEB_SITE_T _T("?id=support") );
-	BT_AddRegFile( _T("settings.reg"), _T("HKEY_CURRENT_USER\\") REGISTRY_KEY );
-	BT_InstallSehFilter();
-	BT_SetTerminate();
 }
 
 CShareazaApp::~CShareazaApp()
@@ -316,6 +306,37 @@ CShareazaApp::~CShareazaApp()
 	{
 		CloseHandle( m_pMutex );
 	}
+}
+
+void CShareazaApp::RegisterBugReporting()
+{
+	// BUGSPLAT INITIALIZATION
+	const DWORD flags = MDSF_PREVENTHIJACKING;
+
+	mpSender = new MiniDmpSender(L"shareaza", MOD_CLIENT_NAME_T, m_sVersionLong.GetString(), NULL, flags);
+
+
+	// Call each of the exposed methods
+	mpSender->enableExceptionFilter(false);
+	ASSERT(FALSE == mpSender->isExceptionFilterEnabled());
+
+	mpSender->enableExceptionFilter();
+	ASSERT(TRUE == mpSender->isExceptionFilterEnabled());
+
+	mpSender->enableExceptionFilter(true);
+	ASSERT(TRUE == mpSender->isExceptionFilterEnabled());
+
+
+	//! Use to set full path for BsSndRpt's resource DLL (allows dialog customizations, e.g. language); default is ./BugSplatRc.dll (or ./BugSplatRc64.dll).
+#ifdef _WIN64	
+	wchar_t* path = L"./BugSplatRc64.dll";
+#else
+	wchar_t* path = L"./BugSplatRc.dll";
+#endif // _WIN64
+	mpSender->setResourceDllPath(path);
+
+	//! Must call setFlags with MDSF_DETECTHANGS and other flags after calling setHangDetectionTimeout
+	mpSender->setFlags(MDSF_DETECTHANGS | flags);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -334,6 +355,7 @@ BOOL CShareazaApp::InitInstance()
 	//AfxEnableControlContainer(m_pFontManager); // Enable support for containment of OLE controls.
 	AfxEnableControlContainer();
 	InitResources();			// Loads theApp settings.
+	RegisterBugReporting();
 	Settings.Load();			// Loads settings. Depends on InitResources().
 
 	if ( m_pfnSetCurrentProcessExplicitAppUserModelID )
@@ -1083,8 +1105,6 @@ void CShareazaApp::InitResources()
 		_T(" LAN")
 #endif
 		_T(" (commit ") STRINGIZE(__REVISION__) _T(" of ") STRINGIZE(__REVISION_DATE__) _T(")");
-
-	BT_SetAppVersion( m_sVersionLong );
 
 	m_sSmartAgent = MOD_CLIENT_NAME_T;
 	m_sSmartAgent += _T(" ");

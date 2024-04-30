@@ -237,10 +237,12 @@ protected:
 	void				FreeCountry();		// Free GeoIP resources
 
 	DECLARE_MESSAGE_MAP()
+	MiniDmpSender* mpSender;
 
 private:
 	CShareazaApp(const CShareazaApp&);
 	CShareazaApp& operator=(const CShareazaApp&);
+	void RegisterBugReporting();
 };
 
 extern CShareazaApp			theApp;						// Shareaza Application
