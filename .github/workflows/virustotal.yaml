@@ -1,0 +1,27 @@
+name: VirusTotal Check
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download All Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        run-id: 98
+        path: .
+        merge-multiple: true
+
+  virustotal:
+    runs-on: ubuntu-latest
+    steps:
+      - name: VirusTotal Scan
+        uses: crazy-max/ghaction-virustotal@v4
+        with:
+          vt_api_key: ${{ secrets.VT_API_KEY }}
+          files: |
+            .exe$
