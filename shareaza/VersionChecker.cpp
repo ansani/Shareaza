@@ -279,7 +279,16 @@ void CVersionChecker::ProcessResponse()
 	//UpgradePrompt
 	if ( m_pResponse.Lookup( _T("name"), strValue ) )
 	{
-		Settings.VersionCheck.UpgradePrompt = _T("New version available: ") + strValue;
+		CString versionString;
+		for (int i = 0; i < strValue.GetLength(); ++i) {
+			if (isdigit(strValue[i])) {
+				versionString = strValue.Mid(i);
+				break;
+			}
+		}
+//		versionString = strValue;
+
+		Settings.VersionCheck.UpgradePrompt = _T("New version available: ") + versionString;
 		Settings.VersionCheck.UpgradePrompt.Append(_T("\r\nRelease date: "));
 		m_pResponse.Lookup(_T("published_at"), strValue);
 		Settings.VersionCheck.UpgradePrompt.Append(strValue);
@@ -312,7 +321,8 @@ void CVersionChecker::ProcessResponse()
 		m_pResponse.Lookup( _T("UpgradeSize"), Settings.VersionCheck.UpgradeSize );
 		Settings.VersionCheck.UpgradeSources = s_UriAsset;
 //		m_pResponse.Lookup( _T("UpgradeSources"), Settings.VersionCheck.UpgradeSources );
-		m_pResponse.Lookup( _T("name"), Settings.VersionCheck.UpgradeVersion );
+		//m_pResponse.Lookup( _T("name"), Settings.VersionCheck.UpgradeVersion );
+		Settings.VersionCheck.UpgradeVersion = versionString;
 
 		// Old name
 		if ( ! Settings.VersionCheck.UpgradeSHA1.GetLength() )
