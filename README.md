@@ -1,4 +1,6 @@
 # Compiling Shareaza
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fansani%2FShareaza.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fansani%2FShareaza?ref=badge_shield)
+
 
 ## Microsoft Visual Studio
 
@@ -59,3 +61,7 @@ At the end of a successful compile you will find a newly compiled installer in \
 Note: If you try compiling an x64 build on a 32bit machine you will get the following repeated error "Project : error PRJ0019: A tool returned an error code from "Performing registration". This error occurs because you can not register 64bit DLLs on a 32bit machine! It is not advisable to compile a 64-bit build on 32-bit windows, as you cannot test what you are compiling.
 
 Enjoy ;)
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fansani%2FShareaza.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fansani%2FShareaza?ref=badge_large)
